@@ -1,0 +1,13 @@
+formatter: "md doc"
+content: |-
+  # SUEZ VMAAS TERRAFORM MODULE
+
+  {{ .Header }} 
+
+  {{ .Requirements }}
+
+  {{ .Resources }}
+
+  {{ .Inputs }}
+
+  {{ .Outputs }}  
