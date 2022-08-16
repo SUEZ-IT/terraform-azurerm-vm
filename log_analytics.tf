@@ -12,14 +12,14 @@ resource "azurerm_virtual_machine_extension" "vmagent" {
 
   auto_upgrade_minor_version = "true"
 
-  settings = <<SETTINGS
+  settings           = <<SETTINGS
     {
       "workspaceId": "${data.azurerm_log_analytics_workspace.cloudbundle_la.workspace_id}"
     }
 SETTINGS
-   protected_settings = <<PROTECTED_SETTINGS
-   {
+  protected_settings = <<PROTECTED_SETTINGS
+    {
       "workspaceKey": "${data.azurerm_log_analytics_workspace.cloudbundle_la.primary_shared_key}"
-   }
+    }
 PROTECTED_SETTINGS
 }

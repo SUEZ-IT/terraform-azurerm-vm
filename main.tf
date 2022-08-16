@@ -1,11 +1,11 @@
 data "azurerm_subnet" "vmsubnet" {
   resource_group_name  = "rg-infracb-network-${local.location}-${local.environment}"
   virtual_network_name = "vnet-${local.environment}01-${local.location}"
-  name                 = "snet-${local.app_name}-ce-${local.environment}"
+  name                 = "snet-${local.app_name}-${lookup(local.cloudbundle_type, data.azurerm_resource_group.rg_target.tags["cloudbundle_type"])}-${local.environment}"
 }
 
 data "azurerm_resource_group" "rg_target" {
-  name      = var.resource_group_name
+  name = var.resource_group_name
 }
 
 data "azurerm_shared_image" "osfactory_image" {
@@ -31,6 +31,10 @@ locals {
     classification             = var.classification
     os_type                    = var.os_type
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
+  }
+  cloudbundle_type = {
+    "Enabled"   = "ce"
+    "Optimized" = "co"
   }
 }
 
@@ -61,6 +65,25 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
     caching              = "ReadWrite"
     storage_account_type = var.os_disk_type
   }
+  boot_diagnostics {
+    storage_account_uri = azurerm_storage_account.vm_sa.primary_blob_endpoint
+  }
+}
+
+resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
+  count                = var.os_type == "Windows" ? 1 : 0
+  name                 = azurerm_windows_virtual_machine.virtual_machine[0].name
+  virtual_machine_id   = azurerm_windows_virtual_machine.virtual_machine[0].id
+  publisher            = "Microsoft.Compute"
+  type                 = "CustomScriptExtension"
+  type_handler_version = "1.9"
+
+  protected_settings = <<SETTINGS
+  {
+     "commandToExecute": "powershell -encodedCommand ${textencodebase64(file("${path.module}/scripts/vm_win_mount_vol.ps1"), "UTF-16LE")}"
+  }
+  SETTINGS
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment]
 }
 
 resource "azurerm_linux_virtual_machine" "virtual_machine" {
@@ -80,4 +103,41 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
     caching              = "ReadWrite"
     storage_account_type = var.os_disk_type
   }
+  boot_diagnostics {
+    storage_account_uri = azurerm_storage_account.vm_sa.primary_blob_endpoint
+  }
+}
+
+resource "azurerm_virtual_machine_extension" "vm_lin_post_deploy_script" {
+  count                = var.os_type == "Linux" ? 1 : 0
+  name                 = azurerm_linux_virtual_machine.virtual_machine[0].name
+  virtual_machine_id   = azurerm_linux_virtual_machine.virtual_machine[0].id
+  publisher            = "Microsoft.Azure.Extensions"
+  type                 = "CustomScript"
+  type_handler_version = "2.1"
+
+  protected_settings = <<PROT
+  {
+     "script": "${base64encode(file("${path.module}/scripts/vm_lin_mount_vol.sh"))}"
+  }
+  PROT
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment]
+}
+
+resource "azurerm_managed_disk" "virtual_machine_data_disk" {
+  for_each             = var.data_disk
+  name                 = format("%s-datadisk-%s", "${local.vm_name}", each.value.lun)
+  location             = local.location
+  resource_group_name  = var.resource_group_name
+  storage_account_type = each.value.type
+  create_option        = "Empty"
+  disk_size_gb         = each.value.size
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "virtual_machine_data_disk_attachment" {
+  for_each           = var.data_disk
+  managed_disk_id    = azurerm_managed_disk.virtual_machine_data_disk[each.key].id
+  virtual_machine_id = var.os_type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
+  lun                = each.value.lun
+  caching            = "ReadWrite"
 }
