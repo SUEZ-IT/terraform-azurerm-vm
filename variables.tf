@@ -1,8 +1,8 @@
 variable "tags_cloudguard" {
-  type = map
+  type        = map(any)
   description = "CloudGuard tags values"
   default = {
-    "fusion_inventory"  = "TRUE"
+    "fusion_inventory" = "TRUE"
   }
 }
 
@@ -32,6 +32,16 @@ variable "os_type" {
     condition     = contains(["Windows", "Linux"], var.os_type)
     error_message = "Valid values for var: os_type are (Windows, Linux)."
   }
+}
+
+variable "data_disk" {
+  type = map(object({
+    size = number
+    type = string
+    lun  = number
+  }))
+  description = "Map of data disk(s)"
+  default     = {}
 }
 
 variable "os_disk_type" {
@@ -73,4 +83,25 @@ variable "reboot_hebdo" {
   type        = bool
   description = "Allow downtime for maintenance and update"
   default     = false
+}
+
+variable "backup" {
+  type        = string
+  description = "Add VM on  backup"
+  default     = "false"
+  validation {
+    condition     = contains(["false", "true"], var.backup)
+    error_message = "Valid values for var: backup are (true, false)."
+  }
+}
+
+variable "gallery_subscription_id" {
+  type        = string
+  description = "Azure compute gallery subscription ID"
+  default     = "d980e79b-480a-4282-a6b5-27e052e79f4b"
+}
+
+locals {
+  validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"
+  validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"]
 }
