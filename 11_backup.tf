@@ -1,13 +1,3 @@
-data "azurerm_recovery_services_vault" "vault_backup" {
-  name                = "rsv-${local.app_name}-${local.environment}"
-  resource_group_name = var.resource_group_name
-
-}
-data "azurerm_backup_policy_vm" "policy" {
-  name                = "DefaultPolicy"
-  recovery_vault_name = data.azurerm_recovery_services_vault.vault_backup.name
-  resource_group_name = var.resource_group_name
-}
 resource "azurerm_backup_protected_vm" "vm_backup" {
   resource_group_name = var.resource_group_name
   recovery_vault_name = data.azurerm_recovery_services_vault.vault_backup.name

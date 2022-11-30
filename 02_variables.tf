@@ -1,15 +1,17 @@
-variable "tags_cloudguard" {
-  type        = map(any)
-  description = "CloudGuard tags values"
-  default = {
-    "fusion_inventory" = "TRUE"
-  }
-}
+# ================= Azure ==================
 
 variable "resource_group_name" {
   type        = string
   description = "Target resource group name"
 }
+
+variable "gallery_subscription_id" {
+  type        = string
+  description = "Azure compute gallery subscription ID"
+  default     = "d980e79b-480a-4282-a6b5-27e052e79f4b"
+}
+
+# ================= Virtual Machine ==================
 
 variable "index" {
   type        = number
@@ -95,13 +97,16 @@ variable "backup" {
   }
 }
 
-variable "gallery_subscription_id" {
+variable deployed_by {
   type        = string
-  description = "Azure compute gallery subscription ID"
-  default     = "d980e79b-480a-4282-a6b5-27e052e79f4b"
+  description = "Define what made the VM deployment"
+  default     = "VMaaS"
+  validation {
+    condition     = contains(["VMaaS"], var.deployed_by)
+    error_message = "Valid values for var: deployed_by are: VMaaS."
+  }
 }
 
-# Parts to generate for cloud init
 variable "cloudinit_parts" {
   description = <<EOF
 (Optional) A list of maps that contain the information for each part in the cloud-init configuration.
@@ -112,14 +117,20 @@ Each map should have the following fields:
   EOF
 
   type = list(object({
-      content-type = string
-      filepath =  string
-      vars = map(string)
+    content-type = string
+    filepath     = string
+    vars         = map(string)
   }))
   default = []
 }
 
-locals {
-  validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"
-  validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"]
+# ================= Network ==================
+
+variable "tags_cloudguard" {
+  type        = map(any)
+  description = "CloudGuard tags values"
+  default = {
+    "fusion_inventory" = "TRUE"
+    "internet"         = "REGULAR"
+  }
 }

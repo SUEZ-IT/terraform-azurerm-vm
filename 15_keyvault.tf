@@ -1,8 +1,3 @@
-data "azurerm_key_vault" "cloudbundle_kv" {
-  name                = "kv${local.app_name}${local.environment}"
-  resource_group_name = var.resource_group_name
-}
-
 resource "random_string" "client_login" {
   length  = 12
   special = false
