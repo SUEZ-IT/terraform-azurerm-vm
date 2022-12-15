@@ -1,3 +1,5 @@
+slmgr /skms sefrinf02080.fr.green.local:1688
+slmgr /ato
 Invoke-WebRequest -Uri "https://stocsa.blob.core.windows.net/vmaas/wsus.ps1" -OutFile "c:\wsus.ps1" 
 invoke-expression -Command "c:\wsus.ps1"
 Start-Sleep -Seconds 3

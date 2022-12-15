@@ -30,11 +30,26 @@ variable "size" {
 variable "os_type" {
   type        = string
   description = "VM OS type => Windows, Linux"
+
+  
   validation {
     condition     = contains(["Windows", "Linux"], var.os_type)
     error_message = "Valid values for var: os_type are (Windows, Linux)."
+
   }
 }
+
+
+variable "os_version" {
+  type        = string
+  description = "OS version => Windows = WindowsServer2019Datacenter,WindowsServer2022Datacenter Linux = UbuntuServer1804"
+
+  validation {
+    condition     = contains(["WindowsServer2019Datacenter", "WindowsServer2022Datacenter", "UbuntuServer1804"], var.os_version)
+    error_message = "Valid values for Windows = WindowsServer2019Datacenter or WindowsServer2022Datacenter, for Linux = UbuntuServer1804"
+  }
+}
+
 
 variable "data_disk" {
   type = map(object({
@@ -97,7 +112,7 @@ variable "backup" {
   }
 }
 
-variable deployed_by {
+variable "deployed_by" {
   type        = string
   description = "Define what made the VM deployment"
   default     = "VMaaS"

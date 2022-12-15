@@ -3,13 +3,14 @@ locals {
   environment                 = lower(data.azurerm_resource_group.rg_target.tags["environment"])
   app_name                    = lower(data.azurerm_resource_group.rg_target.tags["app_name"])
   location                    = lower(data.azurerm_resource_group.rg_target.location)
-  osfactory_image_name        = var.os_type == "Windows" ? "WindowsServer2019Datacenter" : "UbuntuServer1804"
+  osfactory_image_name        = var.os_version
   gallery_name                = "gal_infra_os_factory"
   gallery_resource_group_name = "rg-infra-compute-gallery-northeurope"
   cloudbundle_type = {
     "Enabled"   = "ce"
     "Optimized" = "co"
   }
+
   cloud_init_parts_rendered = [for part in var.cloudinit_parts : <<EOF
 --MIMEBOUNDARY
 Content-Transfer-Encoding: 7bit
@@ -26,6 +27,7 @@ ${templatefile(part.filepath, part.vars)}
     availability               = var.availability
     classification             = var.classification
     os_type                    = var.os_type
+    os_version                 = var.os_version
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
   }
@@ -35,6 +37,7 @@ ${templatefile(part.filepath, part.vars)}
     reboot_hebdo               = var.reboot_hebdo
     availability               = var.availability
     classification             = var.classification
+    os_version                 = var.os_version
     os_type                    = var.os_type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]

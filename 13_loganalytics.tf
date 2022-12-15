@@ -4,7 +4,7 @@ resource "azurerm_virtual_machine_extension" "vmagent" {
   publisher            = "Microsoft.EnterpriseCloud.Monitoring"
   type                 = var.os_type == "Windows" ? "MicrosoftMonitoringAgent" : "OmsAgentForLinux"
   type_handler_version = var.os_type == "Windows" ? "1.0" : "1.14"
-  
+
   auto_upgrade_minor_version = "true"
 
   settings           = <<SETTINGS
