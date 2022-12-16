@@ -17,4 +17,5 @@ SETTINGS
       "workspaceKey": "${data.azurerm_log_analytics_workspace.cloudbundle_la.primary_shared_key}"
     }
 PROTECTED_SETTINGS
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment]
 }

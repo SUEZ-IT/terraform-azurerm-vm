@@ -31,7 +31,7 @@ variable "os_type" {
   type        = string
   description = "VM OS type => Windows, Linux"
 
-  
+
   validation {
     condition     = contains(["Windows", "Linux"], var.os_type)
     error_message = "Valid values for var: os_type are (Windows, Linux)."
