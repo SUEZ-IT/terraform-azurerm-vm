@@ -42,11 +42,11 @@ variable "os_type" {
 
 variable "os_version" {
   type        = string
-  description = "OS version => Windows = WindowsServer2019Datacenter,WindowsServer2022Datacenter Linux = UbuntuServer1804"
+  description = "OS version => Windows = WindowsServer2019Datacenter,WindowsServer2022Datacenter Linux = UbuntuServer1804, UbuntuServer2204"
 
   validation {
-    condition     = contains(["WindowsServer2019Datacenter", "WindowsServer2022Datacenter", "UbuntuServer1804"], var.os_version)
-    error_message = "Valid values for Windows = WindowsServer2019Datacenter or WindowsServer2022Datacenter, for Linux = UbuntuServer1804"
+    condition     = contains(["WindowsServer2019Datacenter", "WindowsServer2022Datacenter", "UbuntuServer1804", "UbuntuServer2204"], var.os_version)
+    error_message = "Valid values for Windows = WindowsServer2019Datacenter or WindowsServer2022Datacenter, for Linux = UbuntuServer1804 or UbuntuServer2204"
   }
 }
 
