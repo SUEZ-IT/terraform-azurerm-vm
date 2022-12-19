@@ -117,7 +117,7 @@ variable "deployed_by" {
   description = "Define what made the VM deployment"
   default     = "VMaaS"
   validation {
-    condition     = contains(["VMaaS"], var.deployed_by)
+    condition     = contains(["VMaaS", "Test_by_VMaaS"], var.deployed_by)
     error_message = "Valid values for var: deployed_by are: VMaaS."
   }
 }
