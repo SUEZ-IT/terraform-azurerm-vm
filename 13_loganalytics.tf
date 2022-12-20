@@ -1,5 +1,5 @@
 resource "azurerm_virtual_machine_extension" "vmagent" {
-  count                = var.os_version != "UbuntuServer2204" ? 1 : 0
+  count                = var.os.type != "Ubuntu" && var.os.version != "2204" ? 1 : 0
   name                 = "vmagent"
   virtual_machine_id   = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
   publisher            = "Microsoft.EnterpriseCloud.Monitoring"
