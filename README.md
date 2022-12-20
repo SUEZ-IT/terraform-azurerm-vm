@@ -51,8 +51,8 @@
 | <a name="input_deployed_by"></a> [deployed\_by](#input\_deployed\_by) | Define what made the VM deployment | `string` | `"VMaaS"` | no |
 | <a name="input_gallery_subscription_id"></a> [gallery\_subscription\_id](#input\_gallery\_subscription\_id) | Azure compute gallery subscription ID | `string` | `"d980e79b-480a-4282-a6b5-27e052e79f4b"` | no |
 | <a name="input_index"></a> [index](#input\_index) | Index of the VM | `number` | n/a | yes |
+| <a name="input_os"></a> [os](#input\_os) | OS type and version | <pre>object({<br>    type    = string<br>    version = string<br>  })</pre> | n/a | yes |
 | <a name="input_os_disk_type"></a> [os\_disk\_type](#input\_os\_disk\_type) | VM OS disk type => Premium\_LRS, Standard\_LRS, StandardSSD\_LRS, StandardSSD\_ZRS, Premium\_ZRS | `string` | `"Standard_LRS"` | no |
-| <a name="input_os_type"></a> [os\_type](#input\_os\_type) | VM OS type => Windows, Linux | `string` | n/a | yes |
 | <a name="input_reboot_hebdo"></a> [reboot\_hebdo](#input\_reboot\_hebdo) | Allow downtime for maintenance and update | `bool` | `false` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Target resource group name | `string` | n/a | yes |
 | <a name="input_role"></a> [role](#input\_role) | VM role => frontend, backend, etc... | `string` | n/a | yes |

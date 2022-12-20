@@ -31,7 +31,7 @@ data "azurerm_resource_group" "rg_target" {
 
 data "azurerm_shared_image" "osfactory_image" {
   provider            = azurerm.gallery
-  name                = var.os_version
+  name                = local.osfactory_image_name[0]
   gallery_name        = local.gallery_name
   resource_group_name = local.gallery_resource_group_name
 }

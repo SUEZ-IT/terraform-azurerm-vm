@@ -27,29 +27,18 @@ variable "size" {
   description = "VM size (https://docs.microsoft.com/en-us/azure/virtual-machines/sizes)."
 }
 
-variable "os_type" {
-  type        = string
-  description = "VM OS type => Windows, Linux"
-
-
-  validation {
-    condition     = contains(["Windows", "Linux"], var.os_type)
-    error_message = "Valid values for var: os_type are (Windows, Linux)."
-
-  }
-}
-
-
-variable "os_version" {
-  type        = string
-  description = "OS version => Windows = WindowsServer2019Datacenter,WindowsServer2022Datacenter Linux = UbuntuServer1804, UbuntuServer2204"
+variable "os" {
+  type = object({
+    type    = string
+    version = string
+  })
+  description = "OS type and version"
 
   validation {
-    condition     = contains(["WindowsServer2019Datacenter", "WindowsServer2022Datacenter", "UbuntuServer1804", "UbuntuServer2204"], var.os_version)
-    error_message = "Valid values for Windows = WindowsServer2019Datacenter or WindowsServer2022Datacenter, for Linux = UbuntuServer1804 or UbuntuServer2204"
+    condition     = contains([{ type = "Ubuntu", version = "1804" }, { type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2019" }, { type = "Windows", version = "2022" }], var.os)
+    error_message = "Valid values for var: os are ({type = \"Ubuntu\", version = \"1804\"}, {type = \"Ubuntu\", version = \"2204\"}, {type = \"Windows\", version = \"2019\"}, {type = \"Windows\", version = \"2022\"})."
   }
 }
-
 
 variable "data_disk" {
   type = map(object({

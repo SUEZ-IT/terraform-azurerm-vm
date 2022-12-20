@@ -10,7 +10,7 @@ resource "azurerm_network_interface" "VmNic" {
 }
 
 resource "azurerm_windows_virtual_machine" "virtual_machine" {
-  count                 = var.os_type == "Windows" ? 1 : 0
+  count                 = var.os.type == "Windows" ? 1 : 0
   name                  = local.vm_name
   location              = local.location
   resource_group_name   = var.resource_group_name
@@ -32,7 +32,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
 }
 
 resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
-  count                = var.os_type == "Windows" ? 1 : 0
+  count                = var.os.type == "Windows" ? 1 : 0
   name                 = azurerm_windows_virtual_machine.virtual_machine[0].name
   virtual_machine_id   = azurerm_windows_virtual_machine.virtual_machine[0].id
   publisher            = "Microsoft.Compute"
@@ -48,7 +48,7 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
 }
 
 resource "azurerm_linux_virtual_machine" "virtual_machine" {
-  count                           = var.os_type == "Linux" ? 1 : 0
+  count                           = var.os.type != "Windows" ? 1 : 0
   name                            = local.vm_name
   location                        = local.location
   resource_group_name             = var.resource_group_name
@@ -71,7 +71,7 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
 }
 
 resource "azurerm_virtual_machine_extension" "vm_lin_post_deploy_script" {
-  count                = var.os_type == "Linux" ? 1 : 0
+  count                = var.os.type != "Windows" ? 1 : 0
   name                 = azurerm_linux_virtual_machine.virtual_machine[0].name
   virtual_machine_id   = azurerm_linux_virtual_machine.virtual_machine[0].id
   publisher            = "Microsoft.Azure.Extensions"
@@ -100,7 +100,7 @@ resource "azurerm_managed_disk" "virtual_machine_data_disk" {
 resource "azurerm_virtual_machine_data_disk_attachment" "virtual_machine_data_disk_attachment" {
   for_each           = var.data_disk
   managed_disk_id    = azurerm_managed_disk.virtual_machine_data_disk[each.key].id
-  virtual_machine_id = var.os_type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
+  virtual_machine_id = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
   lun                = each.value.lun
   caching            = "ReadWrite"
 }

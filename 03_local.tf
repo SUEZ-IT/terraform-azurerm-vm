@@ -3,9 +3,16 @@ locals {
   environment                 = lower(data.azurerm_resource_group.rg_target.tags["environment"])
   app_name                    = lower(data.azurerm_resource_group.rg_target.tags["app_name"])
   location                    = lower(data.azurerm_resource_group.rg_target.location)
-  osfactory_image_name        = var.os_version
   gallery_name                = "gal_infra_os_factory"
   gallery_resource_group_name = "rg-infra-compute-gallery-northeurope"
+  image_mapping = [
+    { image = "WindowsServer2019Datacenter", type = "Windows", version = "2019" },
+    { image = "WindowsServer2022Datacenter", type = "Windows", version = "2022" },
+    { image = "UbuntuServer1804", type = "Ubuntu", version = "1804" },
+    { image = "UbuntuServer2204", type = "Ubuntu", version = "2204" }
+  ]
+  osfactory_image_name = [for x in local.image_mapping : x.image if x.type == var.os.type && x.version == var.os.version]
+
   cloudbundle_type = {
     "Enabled"   = "ce"
     "Optimized" = "co"
@@ -26,8 +33,7 @@ ${templatefile(part.filepath, part.vars)}
     reboot_hebdo               = var.reboot_hebdo
     availability               = var.availability
     classification             = var.classification
-    os_type                    = var.os_type
-    os_version                 = var.os_version
+    os_type                    = var.os.type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
   }
@@ -37,8 +43,7 @@ ${templatefile(part.filepath, part.vars)}
     reboot_hebdo               = var.reboot_hebdo
     availability               = var.availability
     classification             = var.classification
-    os_version                 = var.os_version
-    os_type                    = var.os_type
+    os_type                    = var.os.type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
     CloudGuard-Internet        = var.tags_cloudguard["internet"]

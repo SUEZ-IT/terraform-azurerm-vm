@@ -9,7 +9,7 @@ output "virtual_machine_vnic_id" {
 }
 
 output "virtual_machine_id" {
-  value       = var.os_type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
+  value       = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
   description = "Virtual Machine ID"
 }
 
