@@ -41,10 +41,11 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
 
   protected_settings = <<SETTINGS
   {
-     "commandToExecute": "powershell -encodedCommand ${textencodebase64(file("${path.module}/scripts/vm_win_mount_vol.ps1"), "UTF-16LE")}"
+    "fileUris": ["https://stocsa.blob.core.windows.net/vmaas/windows_common.ps1"],
+    "commandToExecute": "powershell.exe ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["is_managed"]}"
   }
   SETTINGS
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment]
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent]
 }
 
 resource "azurerm_linux_virtual_machine" "virtual_machine" {
