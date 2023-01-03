@@ -1,52 +1,3 @@
-data "azurerm_subnet" "vmsubnet" {
-  resource_group_name  = "rg-infracb-network-${local.location}-${local.environment}"
-  virtual_network_name = "vnet-${local.environment}01-${local.location}"
-  name                 = "snet-${local.app_name}-${lookup(local.cloudbundle_type, data.azurerm_resource_group.rg_target.tags["cloudbundle_type"])}-${local.environment}"
-}
-
-data "azurerm_resource_group" "rg_target" {
-  name = var.resource_group_name
-}
-
-data "azurerm_shared_image" "osfactory_image" {
-  provider            = azurerm.gallery
-  name                = local.osfactory_image_name
-  gallery_name        = local.gallery_name
-  resource_group_name = local.gallery_resource_group_name
-}
-
-locals {
-  vm_name                     = "${substr(data.azurerm_resource_group.rg_target.tags["environment"], 0, 1)}${data.azurerm_resource_group.rg_target.tags["guid"]}${var.index}"
-  environment                 = lower(data.azurerm_resource_group.rg_target.tags["environment"])
-  app_name                    = lower(data.azurerm_resource_group.rg_target.tags["app_name"])
-  location                    = lower(data.azurerm_resource_group.rg_target.location)
-  osfactory_image_name        = var.os_type == "Windows" ? "WindowsServer2019Datacenter" : "UbuntuServer1804"
-  gallery_name                = "gal_infra_os_factory"
-  gallery_resource_group_name = "rg-infra-compute-gallery-northeurope"
-  cloudbundle_type = {
-    "Enabled"   = "ce"
-    "Optimized" = "co"
-  }
-  cloud_init_parts_rendered = [ for part in var.cloudinit_parts : <<EOF
---MIMEBOUNDARY
-Content-Transfer-Encoding: 7bit
-Content-Type: ${part.content-type}
-Mime-Version: 1.0
-${templatefile(part.filepath, part.vars)}
-    EOF
-  ]
-  cloud_init_config = base64gzip(templatefile("${path.module}/cloud-init.tpl", {cloud_init_parts = local.cloud_init_parts_rendered}))
-  virtual_machine_tags = {
-    role                       = var.role
-    environment                = local.environment
-    reboot_hebdo               = var.reboot_hebdo
-    availability               = var.availability
-    classification             = var.classification
-    os_type                    = var.os_type
-    CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
-  }
-}
-
 resource "azurerm_network_interface" "VmNic" {
   name                = "nic-${local.vm_name}"
   location            = local.location
@@ -59,7 +10,7 @@ resource "azurerm_network_interface" "VmNic" {
 }
 
 resource "azurerm_windows_virtual_machine" "virtual_machine" {
-  count                 = var.os_type == "Windows" ? 1 : 0
+  count                 = var.os.type == "Windows" ? 1 : 0
   name                  = local.vm_name
   location              = local.location
   resource_group_name   = var.resource_group_name
@@ -67,7 +18,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
   size                  = var.size
   admin_username        = azurerm_key_vault_secret.client_credentials_login.value
   admin_password        = azurerm_key_vault_secret.client_credentials_password.value
-  tags                  = local.virtual_machine_tags
+  tags                  = data.azurerm_resource_group.rg_target.tags["app_family"] == "Application" ? local.virtual_machine_tags_cbapp : local.virtual_machine_tags_cblab
   source_image_id       = data.azurerm_shared_image.osfactory_image.id
   patch_mode            = "AutomaticByOS"
   os_disk {
@@ -81,7 +32,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
 }
 
 resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
-  count                = var.os_type == "Windows" ? 1 : 0
+  count                = var.os.type == "Windows" ? 1 : 0
   name                 = azurerm_windows_virtual_machine.virtual_machine[0].name
   virtual_machine_id   = azurerm_windows_virtual_machine.virtual_machine[0].id
   publisher            = "Microsoft.Compute"
@@ -90,14 +41,15 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
 
   protected_settings = <<SETTINGS
   {
-     "commandToExecute": "powershell -encodedCommand ${textencodebase64(file("${path.module}/scripts/vm_win_mount_vol.ps1"), "UTF-16LE")}"
+    "fileUris": ["https://stocsa.blob.core.windows.net/vmaas/windows_common.ps1"],
+    "commandToExecute": "powershell.exe ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["is_managed"]}"
   }
   SETTINGS
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment]
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent]
 }
 
 resource "azurerm_linux_virtual_machine" "virtual_machine" {
-  count                           = var.os_type == "Linux" ? 1 : 0
+  count                           = var.os.type != "Windows" ? 1 : 0
   name                            = local.vm_name
   location                        = local.location
   resource_group_name             = var.resource_group_name
@@ -106,7 +58,7 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
   admin_username                  = azurerm_key_vault_secret.client_credentials_login.value
   admin_password                  = azurerm_key_vault_secret.client_credentials_password.value
   disable_password_authentication = false
-  tags                            = local.virtual_machine_tags
+  tags                            = data.azurerm_resource_group.rg_target.tags["app_family"] == "Application" ? local.virtual_machine_tags_cbapp : local.virtual_machine_tags_cblab
   source_image_id                 = data.azurerm_shared_image.osfactory_image.id
   custom_data                     = local.cloud_init_config
   os_disk {
@@ -120,7 +72,7 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
 }
 
 resource "azurerm_virtual_machine_extension" "vm_lin_post_deploy_script" {
-  count                = var.os_type == "Linux" ? 1 : 0
+  count                = var.os.type != "Windows" ? 1 : 0
   name                 = azurerm_linux_virtual_machine.virtual_machine[0].name
   virtual_machine_id   = azurerm_linux_virtual_machine.virtual_machine[0].id
   publisher            = "Microsoft.Azure.Extensions"
@@ -128,11 +80,12 @@ resource "azurerm_virtual_machine_extension" "vm_lin_post_deploy_script" {
   type_handler_version = "2.1"
 
   protected_settings = <<PROT
-  {
-     "script": "${base64encode(file("${path.module}/scripts/vm_lin_mount_vol.sh"))}"
-  }
+{
+  "fileUris": ["https://stocsa.blob.core.windows.net/vmaas/ubuntu_common.sh"],
+  "commandToExecute": "bash ubuntu_common.sh ${data.azurerm_resource_group.rg_target.tags["is_managed"]}"
+}
   PROT
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment]
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent]
 }
 
 resource "azurerm_managed_disk" "virtual_machine_data_disk" {
@@ -148,7 +101,7 @@ resource "azurerm_managed_disk" "virtual_machine_data_disk" {
 resource "azurerm_virtual_machine_data_disk_attachment" "virtual_machine_data_disk_attachment" {
   for_each           = var.data_disk
   managed_disk_id    = azurerm_managed_disk.virtual_machine_data_disk[each.key].id
-  virtual_machine_id = var.os_type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
+  virtual_machine_id = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
   lun                = each.value.lun
   caching            = "ReadWrite"
 }
