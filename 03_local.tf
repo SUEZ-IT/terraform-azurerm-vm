@@ -17,7 +17,6 @@ locals {
     "Enabled"   = "ce"
     "Optimized" = "co"
   }
-
   cloud_init_parts_rendered = [for part in var.cloudinit_parts : <<EOF
 --MIMEBOUNDARY
 Content-Transfer-Encoding: 7bit
