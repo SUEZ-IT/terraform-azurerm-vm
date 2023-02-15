@@ -22,7 +22,7 @@ data "azurerm_log_analytics_workspace" "cloudbundle_la" {
 data "azurerm_subnet" "vmsubnet" {
   resource_group_name  = "rg-infracb-network-${local.location}-${local.environment}"
   virtual_network_name = "vnet-${local.environment}01-${local.location}"
-  name                 = "snet-${local.app_name}-${lookup(local.cloudbundle_type, data.azurerm_resource_group.rg_target.tags["cloudbundle_type"])}-${local.environment}"
+  name                 = "snet-${local.app_name}-main-${local.environment}"
 }
 
 data "azurerm_resource_group" "rg_target" {
