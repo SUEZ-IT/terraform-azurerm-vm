@@ -42,7 +42,7 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
   protected_settings = <<SETTINGS
   {
     "fileUris": ["https://stocsa.blob.core.windows.net/vmaas/windows_common.ps1"],
-    "commandToExecute": "powershell.exe ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["is_managed"]}"
+    "commandToExecute": "powershell.exe ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}"
   }
   SETTINGS
   depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent]
@@ -82,7 +82,7 @@ resource "azurerm_virtual_machine_extension" "vm_lin_post_deploy_script" {
   protected_settings = <<PROT
 {
   "fileUris": ["https://stocsa.blob.core.windows.net/vmaas/ubuntu_common.sh"],
-  "commandToExecute": "bash ubuntu_common.sh ${data.azurerm_resource_group.rg_target.tags["is_managed"]}"
+  "commandToExecute": "bash ubuntu_common.sh ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}"
 }
   PROT
   depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent]
