@@ -7,7 +7,7 @@ variable "resource_group_name" {
 
 variable "gallery_subscription_id" {
   type        = string
-  description = "Azure compute gallery subscription ID"
+  description = "(Optional) Azure compute gallery subscription ID"
   default     = "d980e79b-480a-4282-a6b5-27e052e79f4b"
 }
 
@@ -46,13 +46,13 @@ variable "data_disk" {
     type = string
     lun  = number
   }))
-  description = "Map of data disk(s)"
+  description = "(Optional) Map of data disk(s)"
   default     = {}
 }
 
 variable "os_disk_type" {
   type        = string
-  description = "VM OS disk type => Premium_LRS, Standard_LRS, StandardSSD_LRS, StandardSSD_ZRS, Premium_ZRS"
+  description = "(Optional) VM OS disk type => Premium_LRS, Standard_LRS, StandardSSD_LRS, StandardSSD_ZRS, Premium_ZRS"
   default     = "Standard_LRS"
   validation {
     condition     = contains(["Standard_LRS", "Premium_LRS", "StandardSSD_LRS", "StandardSSD_ZRS", "Premium_ZRS"], var.os_disk_type)
@@ -85,15 +85,45 @@ variable "availability" {
   }
 }
 
-variable "reboot_hebdo" {
-  type        = bool
-  description = "Allow downtime for maintenance and update"
-  default     = false
+variable "reboothebdo" {
+  type        = string
+  description = <<EOF
+  (Optional) Default reboot time is every Tuesday at 4AM (2.4). In order to update day and time, use this parameter. 
+  "VM reboot time => [1-5].[0-23], No"
+  Find more details here : https://dev.azure.com/suez-it-foundations-cloud/Cloud%20Documentation/_wiki?pageId=6263&friendlyName=How-to-automate-VM-Start-Stop-Reboot-#
+  EOF
+  default     = "2.4"
+}
+
+variable "start" {
+  type        = string
+  description = <<EOF
+  (Optional) Use this parameter only if availability = "businessday".
+  "VM desired start => [1-5].[0-23],[1-5].[0-23],[1-5].[0-23],[1-5].[0-23], No"
+  Example for VM that will be started at 7AM on Thursday and all others workdays at 5AM: 
+    availability = "businessday"
+    start        = "1.5,2.5,3.5,4.7,5.5"
+  Find more details here : https://dev.azure.com/suez-it-foundations-cloud/Cloud%20Documentation/_wiki?pageId=6263&friendlyName=How-to-automate-VM-Start-Stop-Reboot-#
+  EOF
+  default     = ""
+}
+
+variable "stop" {
+  type        = string
+  description = <<EOF
+  (Optional) Use this parameter only if availability = "businessday".
+  "VM desired stop => [1-5].[0-23],[1-5].[0-23],[1-5].[0-23],[1-5].[0-23], No"
+  Example for VM that will be stopped at 5PM on Thursday and all others workdays at 11PM: 
+    availability = "businessday"
+    start        = "1.23,2.23,3.23,4.23,5.17"
+  Find more details here : https://dev.azure.com/suez-it-foundations-cloud/Cloud%20Documentation/_wiki?pageId=6263&friendlyName=How-to-automate-VM-Start-Stop-Reboot-#
+  EOF
+  default     = ""
 }
 
 variable "backup" {
   type        = string
-  description = "Add VM on  backup"
+  description = "(Optional) VM backup enable or not => true, false"
   default     = "false"
   validation {
     condition     = contains(["false", "true"], var.backup)
@@ -103,7 +133,7 @@ variable "backup" {
 
 variable "deployed_by" {
   type        = string
-  description = "Define what made the VM deployment"
+  description = "(Optional) VM information => VMaaS, Test_by_VMaaS"
   default     = "VMaaS"
   validation {
     condition     = contains(["VMaaS", "Test_by_VMaaS"], var.deployed_by)
@@ -132,7 +162,7 @@ Each map should have the following fields:
 
 variable "tags_cloudguard" {
   type        = map(any)
-  description = "CloudGuard tags values"
+  description = "(Optional) VM network flows => find more details here : https://dev.azure.com/suez-it-foundations-cloud/Cloud%20Documentation/_wiki/wikis/Cloud-Documentation.wiki/6066/From-OS-Shared-Image-Gallery?anchor=set-virtual-machine%27s-tags# "
   default = {
     "fusion_inventory" = "TRUE"
     "internet"         = "REGULAR"
