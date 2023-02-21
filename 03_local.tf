@@ -13,6 +13,7 @@ locals {
   ]
   osfactory_image_name = [for x in local.image_mapping : x.image if x.type == var.os.type && x.version == var.os.version]
 
+  
   cloudbundle_type = {
     "Enabled"   = "ce"
     "Optimized" = "co"

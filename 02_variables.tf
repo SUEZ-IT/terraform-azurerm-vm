@@ -27,6 +27,14 @@ variable "size" {
   description = "VM size (https://docs.microsoft.com/en-us/azure/virtual-machines/sizes)."
 }
 
+
+variable "subnet" {
+  type        = string
+  description = "(Optional) By default, if the 'subnet' argument is not defined, the VM will be deployed directly in the main subnet of the Cloud Bundle. However, if the 'subnet' argument is specified, the VM will be deployed in the designated subnet."
+  default = ""
+}
+
+
 variable "os" {
   type = object({
     type    = string
