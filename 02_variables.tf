@@ -43,10 +43,11 @@ variable "os" {
   description = "OS type and version"
 
   validation {
-    condition     = contains([{ type = "Ubuntu", version = "1804" }, { type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2019" }, { type = "Windows", version = "2022" }], var.os)
-    error_message = "Valid values for var: os are ({type = \"Ubuntu\", version = \"1804\"}, {type = \"Ubuntu\", version = \"2204\"}, {type = \"Windows\", version = \"2019\"}, {type = \"Windows\", version = \"2022\"})."
+    condition     = contains([{ type = "Ubuntu", version = "1804" }, { type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2019" }, { type = "Windows", version = "2022" }, { type = "Rocky", version = "8" }], var.os)
+    error_message = "Valid values for var: os are ({type = \"Ubuntu\", version = \"1804\"}, {type = \"Ubuntu\", version = \"2204\"}, {type = \"Windows\", version = \"2019\"}, {type = \"Windows\", version = \"2022\"}, { type = \"Rocky\", version = \"8\"})."
   }
 }
+
 
 variable "data_disk" {
   type = map(object({
@@ -67,7 +68,6 @@ variable "os_disk_type" {
     error_message = "Valid values for var: os_disk_type are (Premium_LRS, Standard_LRS, StandardSSD_LRS, StandardSSD_ZRS, Premium_ZRS)."
   }
 }
-
 variable "role" {
   type        = string
   description = "VM role => frontend, backend, etc..."
@@ -128,6 +128,7 @@ variable "stop" {
   EOF
   default     = ""
 }
+
 
 variable "backup" {
   type        = string
