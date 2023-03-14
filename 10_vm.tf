@@ -59,8 +59,13 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
   admin_password                  = azurerm_key_vault_secret.client_credentials_password.value
   disable_password_authentication = false
   tags                            = data.azurerm_resource_group.rg_target.tags["app_family"] == "Application" ? local.virtual_machine_tags_cbapp : local.virtual_machine_tags_cblab
-  source_image_id                 = data.azurerm_shared_image.osfactory_image.id
+  source_image_id                 = data.azurerm_shared_image.osfactory_image.id  
   custom_data                     = local.cloud_init_config
+  plan    {
+    name                          = var.os.type != "Rocky" ? "" : local.plan_name
+    product                       = var.os.type != "Rocky" ? "" : local.plan_product
+    publisher                     = var.os.type != "Rocky" ? "" : local.plan_publisher
+   }
   os_disk {
     name                 = "${local.vm_name}-osdisk"
     caching              = "ReadWrite"
@@ -80,13 +85,15 @@ resource "azurerm_virtual_machine_extension" "vm_lin_post_deploy_script" {
   type_handler_version = "2.1"
 
   protected_settings = <<PROT
+
 {
   "fileUris": ["https://stocsa.blob.core.windows.net/vmaas/ubuntu_common.sh"],
   "commandToExecute": "bash ubuntu_common.sh ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}"
 }
   PROT
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent]
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.vmagent]
 }
+
 
 resource "azurerm_managed_disk" "virtual_machine_data_disk" {
   for_each             = var.data_disk

@@ -44,20 +44,22 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_availability"></a> [availability](#input\_availability) | VM desired availability => 24/24 - 7/7, businessday, self-care, sleep | `string` | `"businessday"` | no |
-| <a name="input_backup"></a> [backup](#input\_backup) | Add VM on  backup | `string` | `"false"` | no |
+| <a name="input_backup"></a> [backup](#input\_backup) | (Optional) VM backup enable or not => true, false | `string` | `"false"` | no |
 | <a name="input_classification"></a> [classification](#input\_classification) | VM classification => application [app] or infrastructure [infra] | `string` | `"app"` | no |
 | <a name="input_cloudinit_parts"></a> [cloudinit\_parts](#input\_cloudinit\_parts) | (Optional) A list of maps that contain the information for each part in the cloud-init configuration.<br>Each map should have the following fields:<br>* content-type - type of content for this part, e.g. text/x-shellscript => https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/cloudinit_config#content_type<br>* filepath - path to the file to use as a template<br>* vars - map of variables to use with the part template | <pre>list(object({<br>    content-type = string<br>    filepath     = string<br>    vars         = map(string)<br>  }))</pre> | `[]` | no |
-| <a name="input_data_disk"></a> [data\_disk](#input\_data\_disk) | Map of data disk(s) | <pre>map(object({<br>    size = number<br>    type = string<br>    lun  = number<br>  }))</pre> | `{}` | no |
-| <a name="input_deployed_by"></a> [deployed\_by](#input\_deployed\_by) | Define what made the VM deployment | `string` | `"VMaaS"` | no |
-| <a name="input_gallery_subscription_id"></a> [gallery\_subscription\_id](#input\_gallery\_subscription\_id) | Azure compute gallery subscription ID | `string` | `""` | no |
+| <a name="input_data_disk"></a> [data\_disk](#input\_data\_disk) | (Optional) Map of data disk(s) | <pre>map(object({<br>    size = number<br>    type = string<br>    lun  = number<br>  }))</pre> | `{}` | no |
+| <a name="input_deployed_by"></a> [deployed\_by](#input\_deployed\_by) | (Optional) VM information => VMaaS, Test\_by\_VMaaS | `string` | `"VMaaS"` | no |
+| <a name="input_gallery_subscription_id"></a> [gallery\_subscription\_id](#input\_gallery\_subscription\_id) | (Optional) Azure compute gallery subscription ID | `string` | `""` | no |
 | <a name="input_index"></a> [index](#input\_index) | Index of the VM | `number` | n/a | yes |
 | <a name="input_os"></a> [os](#input\_os) | OS type and version | <pre>object({<br>    type    = string<br>    version = string<br>  })</pre> | n/a | yes |
-| <a name="input_os_disk_type"></a> [os\_disk\_type](#input\_os\_disk\_type) | VM OS disk type => Premium\_LRS, Standard\_LRS, StandardSSD\_LRS, StandardSSD\_ZRS, Premium\_ZRS | `string` | `"Standard_LRS"` | no |
-| <a name="input_reboot_hebdo"></a> [reboot\_hebdo](#input\_reboot\_hebdo) | Allow downtime for maintenance and update | `bool` | `false` | no |
+| <a name="input_os_disk_type"></a> [os\_disk\_type](#input\_os\_disk\_type) | (Optional) VM OS disk type => Premium\_LRS, Standard\_LRS, StandardSSD\_LRS, StandardSSD\_ZRS, Premium\_ZRS | `string` | `"Standard_LRS"` | no |
+| <a name="input_reboothebdo"></a> [reboothebdo](#input\_reboothebdo) | (Optional) Default reboot time is every Tuesday at 4AM (2.4). In order to update day and time, use this parameter. <br>  "VM reboot time => [1-5].[0-23], No"<br>  Find more details here : WIKI/Cloud%20Documentation/_wiki?pageId=6263&friendlyName=How-to-automate-VM-Start-Stop-Reboot-# | `string` | `"2.4"` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Target resource group name | `string` | n/a | yes |
 | <a name="input_role"></a> [role](#input\_role) | VM role => frontend, backend, etc... | `string` | n/a | yes |
 | <a name="input_size"></a> [size](#input\_size) | VM size (https://docs.microsoft.com/en-us/azure/virtual-machines/sizes). | `string` | n/a | yes |
-| <a name="input_tags_cloudguard"></a> [tags\_cloudguard](#input\_tags\_cloudguard) | CloudGuard tags values | `map(any)` | <pre>{<br>  "fusion_inventory": "TRUE",<br>  "internet": "REGULAR"<br>}</pre> | no |
+| <a name="input_start"></a> [start](#input\_start) | (Optional) Use this parameter only if availability = "businessday".<br>  "VM desired start => [1-5].[0-23],[1-5].[0-23],[1-5].[0-23],[1-5].[0-23], No"<br>  Example for VM that will be started at 7AM on Thursday and all others workdays at 5AM: <br>    availability = "businessday"<br>    start        = "1.5,2.5,3.5,4.7,5.5"<br>  Find more details here : WIKI/Cloud%20Documentation/_wiki?pageId=6263&friendlyName=How-to-automate-VM-Start-Stop-Reboot-# | `string` | `""` | no |
+| <a name="input_stop"></a> [stop](#input\_stop) | (Optional) Use this parameter only if availability = "businessday".<br>  "VM desired stop => [1-5].[0-23],[1-5].[0-23],[1-5].[0-23],[1-5].[0-23], No"<br>  Example for VM that will be stopped at 5PM on Thursday and all others workdays at 11PM: <br>    availability = "businessday"<br>    start        = "1.23,2.23,3.23,4.23,5.17"<br>  Find more details here : WIKI/Cloud%20Documentation/_wiki?pageId=6263&friendlyName=How-to-automate-VM-Start-Stop-Reboot-# | `string` | `""` | no |
+| <a name="input_tags_cloudguard"></a> [tags\_cloudguard](#input\_tags\_cloudguard) | (Optional) VM network flows => find more details here : WIKI/Cloud%20Documentation/_wiki/wikis/Cloud-Documentation.wiki/6066/From-OS-Shared-Image-Gallery?anchor=set-virtual-machine%27s-tags# | `map(any)` | <pre>{<br>  "fusion_inventory": "TRUE",<br>  "internet": "REGULAR"<br>}</pre> | no |
 
 ## Outputs
 
