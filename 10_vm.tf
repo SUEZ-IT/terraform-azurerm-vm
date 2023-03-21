@@ -21,6 +21,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
   tags                  = data.azurerm_resource_group.rg_target.tags["app_family"] == "Application" ? local.virtual_machine_tags_cbapp : local.virtual_machine_tags_cblab
   source_image_id       = data.azurerm_shared_image.osfactory_image.id
   patch_mode            = "AutomaticByOS"
+  zone                  = var.availability_zone
   os_disk {
     name                 = "${local.vm_name}-osdisk"
     caching              = "ReadWrite"
@@ -61,6 +62,7 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
   tags                            = data.azurerm_resource_group.rg_target.tags["app_family"] == "Application" ? local.virtual_machine_tags_cbapp : local.virtual_machine_tags_cblab
   source_image_id                 = data.azurerm_shared_image.osfactory_image.id  
   custom_data                     = local.cloud_init_config
+  zone                            = var.availability_zone
   plan    {
     name                          = var.os.type != "Rocky" ? "" : local.plan_name
     product                       = var.os.type != "Rocky" ? "" : local.plan_product
