@@ -42,6 +42,7 @@ ${templatefile(part.filepath, part.vars)}
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
     start                      = var.start != "" ? var.start : null
     stop                       = var.stop != "" ? var.stop : null
+    ad_domain                  = var.ad_domain
   }
   virtual_machine_tags_cbapp = {
     role                       = var.role
@@ -55,6 +56,7 @@ ${templatefile(part.filepath, part.vars)}
     CloudGuard-Internet        = var.tags_cloudguard["internet"]
     start                      = var.start != "" ? var.start : null
     stop                       = var.stop != "" ? var.stop : null
+    ad_domain                  = var.ad_domain
   }
   validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"
   validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"]

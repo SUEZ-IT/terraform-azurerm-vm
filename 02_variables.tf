@@ -160,6 +160,16 @@ variable "deployed_by" {
   }
 }
 
+variable "ad_domain" {
+  type        = string
+  description = "add vm on ad domain or workgroup"
+  default     = ""
+  validation {
+    condition     = contains(["workgroup", "fr.green.local", "green.local"], var.ad_domain)
+    error_message = "Valid values for var: green.local, fr.green.local or workgroup."
+  }
+}
+
 variable "cloudinit_parts" {
   description = <<EOF
 (Optional) A list of maps that contain the information for each part in the cloud-init configuration.
