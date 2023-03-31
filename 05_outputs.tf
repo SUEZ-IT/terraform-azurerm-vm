@@ -27,3 +27,12 @@ output "cloudbundle_type" {
   value       = data.azurerm_resource_group.rg_target.tags["cloudbundle_type"]
   description = "Cloudbundle type where your resources are located"
 }
+
+output "resource_group_name" {
+  value       = data.azurerm_resource_group.rg_target.name
+  description = "Resource group name"
+}
+output "subscription_name" {
+  value       = data.azurerm_subscription.current.display_name
+  description = "Current subscription name"
+}
