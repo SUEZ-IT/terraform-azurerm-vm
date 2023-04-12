@@ -41,7 +41,7 @@ variable "availability_zone" {
 
   validation {
     condition     = contains(["", "1", "2", "3"], var.availability_zone)
-    error_message = "Valid values for variable availability_zone are: (\"\", \"1\", \"2\", \"3\")."
+    error_message = "Valid values for variable availability_zone are: (\"1\", \"2\", \"3\")."
   }
 }
 

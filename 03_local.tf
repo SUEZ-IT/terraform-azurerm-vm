@@ -4,11 +4,14 @@ locals {
   app_name                    = lower(data.azurerm_resource_group.rg_target.tags["app_name"])
   location                    = lower(data.azurerm_resource_group.rg_target.location)
   location_msp_mapping        = [
-    { location = "northeurope", inframsp = "neu" },
-    { location = "francecentral", inframsp = "fce" },
-    { location = "australiaeast", inframsp = "australiaeast" }
+    { location = "northeurope", inframsp = "neu",code= "neu" },
+    { location = "francecentral", inframsp = "fce",code= "fce"},
+    { location = "australiaeast", inframsp = "australiaeast",code = "aea" },
+    { location = "germanywestcentral", inframsp = "germanywestcentral",code = "gwc" }
+
   ]
   location_msp                = [for x in local.location_msp_mapping : x.inframsp if x.location == local.location]
+  code_msp                = [for x in local.location_msp_mapping : x.code if x.location == local.location]
   managed_by_cap              = lower(data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"])
   subscription_digit          = substr(data.azurerm_subscription.current.display_name, 3, 2)
   plan_name                   = "free"
@@ -68,4 +71,7 @@ ${templatefile(part.filepath, part.vars)}
   }
   validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"
   validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"]
+
+ostype = var.os.type == "windows" ? "w":"l"
+datacollectionrulename = format("am-dcr-%s-%s-%s%s", local.ostype,local.location_msp[0],local.environment,local.subscription_digit)
 }

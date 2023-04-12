@@ -21,7 +21,13 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
   tags                  = data.azurerm_resource_group.rg_target.tags["app_family"] == "Application" ? local.virtual_machine_tags_cbapp : local.virtual_machine_tags_cblab
   source_image_id       = data.azurerm_shared_image.osfactory_image.id
   patch_mode            = "AutomaticByOS"
-  zone                  = var.availability_zone
+  zone = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
+  dynamic "identity" {
+    for_each = "${local.managed_by_cap == "yes" || local.managed_by_cap == "true" ? [1] : []}"
+    content {
+      type = "SystemAssigned"
+    }
+  }
   os_disk {
     name                 = "${local.vm_name}-osdisk"
     caching              = "ReadWrite"
@@ -46,7 +52,7 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
     "commandToExecute": "powershell.exe ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}"
   }
   SETTINGS
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent]
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent,azurerm_virtual_machine_extension.vmagentama]
 }
 
 resource "azurerm_linux_virtual_machine" "virtual_machine" {
@@ -62,7 +68,14 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
   tags                            = data.azurerm_resource_group.rg_target.tags["app_family"] == "Application" ? local.virtual_machine_tags_cbapp : local.virtual_machine_tags_cblab
   source_image_id                 = data.azurerm_shared_image.osfactory_image.id  
   custom_data                     = local.cloud_init_config
-  zone                            = var.availability_zone
+
+  zone = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
+  dynamic "identity" {
+    for_each = "${local.managed_by_cap == "yes" || local.managed_by_cap == "true" ? [1] : []}"
+    content {
+      type = "SystemAssigned"
+    }
+  }
   plan    {
     name                          = var.os.type != "Rocky" ? "" : local.plan_name
     product                       = var.os.type != "Rocky" ? "" : local.plan_product
@@ -93,7 +106,7 @@ resource "azurerm_virtual_machine_extension" "vm_lin_post_deploy_script" {
   "commandToExecute": "bash ubuntu_common.sh ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}"
 }
   PROT
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.vmagent]
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.vmagent,azurerm_virtual_machine_extension.vmagentama]
 }
 
 

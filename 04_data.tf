@@ -1,5 +1,5 @@
 data "azurerm_recovery_services_vault" "vault_backup" {
-  name                = "${local.managed_by_cap == "yes" || local.managed_by_cap == "true" ? "rsv-${local.environment}${local.subscription_digit}-${local.location_msp[0]}-msp-${local.subscription_digit}" : "rsv-${local.app_name}-${local.environment}" }"
+  name                = "${local.managed_by_cap == "yes" || local.managed_by_cap == "true" ? "rsv-${local.environment}${local.subscription_digit}-${local.code_msp[0]}-msp-${local.subscription_digit}" : "rsv-${local.app_name}-${local.environment}" }"
   resource_group_name = "${local.managed_by_cap == "yes" || local.managed_by_cap == "true" ? data.azurerm_resource_group.inframsp[0].name : var.resource_group_name}"
 }
 data "azurerm_backup_policy_vm" "policy" {
@@ -14,8 +14,8 @@ data "azurerm_key_vault" "cloudbundle_kv" {
 }
 
 data "azurerm_log_analytics_workspace" "cloudbundle_la" {
-  name                = "log-${local.app_name}-${local.environment}-default-01"
-  resource_group_name = var.resource_group_name
+  name                = "${local.managed_by_cap == "yes" || local.managed_by_cap == "true" ? "log-${local.environment}${local.subscription_digit}-${local.code_msp[0]}-msp-${local.subscription_digit}" :"log-${local.app_name}-${local.environment}-default-01"}"
+  resource_group_name = "${local.managed_by_cap == "yes" || local.managed_by_cap == "true" ? data.azurerm_resource_group.inframsp[0].name : var.resource_group_name}"
 }
 
 data "azurerm_subnet" "vmsubnet" {
@@ -41,5 +41,11 @@ data "azurerm_resource_group" "inframsp" {
 }
 
 data "azurerm_subscription" "current" {
+}
+
+data "azurerm_monitor_data_collection_rule" "monitordatacolrule" {
+  count = "${local.managed_by_cap == "yes" || local.managed_by_cap == "true" ?1:0}"
+  name                = local.datacollectionrulename
+  resource_group_name = data.azurerm_recovery_services_vault.vault_backup.resource_group_name
 }
 
