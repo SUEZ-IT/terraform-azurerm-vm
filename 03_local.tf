@@ -4,14 +4,13 @@ locals {
   app_name                    = lower(data.azurerm_resource_group.rg_target.tags["app_name"])
   location                    = lower(data.azurerm_resource_group.rg_target.location)
   location_msp_mapping        = [
-    { location = "northeurope", inframsp = "neu",code= "neu" },
-    { location = "francecentral", inframsp = "fce",code= "fce"},
-    { location = "australiaeast", inframsp = "australiaeast",code = "aea" },
-    { location = "germanywestcentral", inframsp = "germanywestcentral",code = "gwc" }
-
+    { location = "northeurope", inframsp = "neu",code = "neu" },
+    { location = "francecentral", inframsp = "fce",code = "fce"},
+    { location = "australiaeast", inframsp = "australiaeast",code ="aea" },
+    { location = "germanywestcentral", inframsp = "germanywestcentral",code="gwc" }
   ]
   location_msp                = [for x in local.location_msp_mapping : x.inframsp if x.location == local.location]
-  code_msp                = [for x in local.location_msp_mapping : x.code if x.location == local.location]
+  code_msp =  [for x in local.location_msp_mapping : x.code if x.location == local.location]
   managed_by_cap              = lower(data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"])
   subscription_digit          = substr(data.azurerm_subscription.current.display_name, 3, 2)
   plan_name                   = "free"
