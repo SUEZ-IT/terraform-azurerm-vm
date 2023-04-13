@@ -1,20 +1,20 @@
 locals {
-  vm_name                     = "S${substr(data.azurerm_resource_group.rg_target.tags["environment"], 0, 1)}${data.azurerm_resource_group.rg_target.tags["guid"]}${var.index}"
-  environment                 = lower(data.azurerm_resource_group.rg_target.tags["environment"])
-  app_name                    = lower(data.azurerm_resource_group.rg_target.tags["app_name"])
-  location                    = lower(data.azurerm_resource_group.rg_target.location)
-  location_msp_mapping        = [
-    { location = "northeurope", inframsp = "neu",code = "neu" },
-    { location = "francecentral", inframsp = "fce",code = "fce"},
-    { location = "australiaeast", inframsp = "australiaeast",code ="aea" },
-    { location = "germanywestcentral", inframsp = "germanywestcentral",code="gwc" }
+  vm_name     = "S${substr(data.azurerm_resource_group.rg_target.tags["environment"], 0, 1)}${data.azurerm_resource_group.rg_target.tags["guid"]}${var.index}"
+  environment = data.azurerm_resource_group.rg_target.tags["environment"]
+  app_name    = lower(data.azurerm_resource_group.rg_target.tags["app_name"])
+  location    = lower(data.azurerm_resource_group.rg_target.location)
+  location_msp_mapping = [
+    { location = "northeurope", inframsp = "neu", code = "neu" },
+    { location = "francecentral", inframsp = "fce", code = "fce" },
+    { location = "australiaeast", inframsp = "australiaeast", code = "aea" },
+    { location = "germanywestcentral", inframsp = "germanywestcentral", code = "gwc" }
   ]
   location_msp                = [for x in local.location_msp_mapping : x.inframsp if x.location == local.location]
-  code_msp =  [for x in local.location_msp_mapping : x.code if x.location == local.location]
-  managed_by_cap              = lower(data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"])
+  code_msp                    = [for x in local.location_msp_mapping : x.code if x.location == local.location]
+  managed_by_cap              = contains(["yes", "true"], lower(data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"])) ? true : false
   subscription_digit          = substr(data.azurerm_subscription.current.display_name, 3, 2)
   plan_name                   = "free"
-  plan_product                = "rockylinux" 
+  plan_product                = "rockylinux"
   plan_publisher              = "erockyenterprisesoftwarefoundationinc1653071250513"
   gallery_name                = "gal_infra_os_factory"
   gallery_resource_group_name = "rg-infra-compute-gallery-northeurope"
@@ -27,7 +27,7 @@ locals {
   ]
   osfactory_image_name = [for x in local.image_mapping : x.image if x.type == var.os.type && x.version == var.os.version]
 
-  
+
   cloudbundle_type = {
     "Enabled"   = "ce"
     "Optimized" = "co"
@@ -71,6 +71,29 @@ ${templatefile(part.filepath, part.vars)}
   validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"
   validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"]
 
-ostype = var.os.type == "windows" ? "w":"l"
-datacollectionrulename = format("am-dcr-%s-%s-%s%s", local.ostype,local.location_msp[0],local.environment,local.subscription_digit)
+  ostype                 = var.os.type == "Windows" ? "w" : "l"
+  datacollectionrulename = format("am-dcr-%s-%s-%s%s", local.ostype, local.location_msp[0], local.environment, local.subscription_digit)
+
+  rsv_mapping = [
+    { availability = "self-care", env = "DEV", policy = "Policy1453-SelfCare-STD" },
+    { availability = "self-care", env = "REC", policy = "Policy1453-SelfCare-STD" },
+    { availability = "self-care", env = "HML", policy = "Policy1453-SelfCare-STD" },
+    { availability = "self-care", env = "PRD", policy = "Policy1453-SelfCare-STD" },
+    { availability = "24/24 - 7/7", env = "DEV", policy = "Policy1453-247-NonProd-STD" },
+    { availability = "24/24 - 7/7", env = "REC", policy = "Policy1453-247-NonProd-STD" },
+    { availability = "24/24 - 7/7", env = "HML", policy = "Policy1453-247-NonProd-STD" },
+    { availability = "24/24 - 7/7", env = "PRD", policy = "Policy1453-247-Prod-STD" },
+    { availability = "businessday", env = "DEV", policy = "Policy1453-BDay-OutProd-STD" },
+    { availability = "businessday", env = "REC", policy = "Policy1453-BDay-OutProd-STD" },
+    { availability = "businessday", env = "HML", policy = "Policy1453-BDay-OutProd-STD" },
+    { availability = "businessday", env = "PRD", policy = "Policy1453-BDay-Prod-STD" }
+  ]
+
+  post_deploy_script     = var.os.type == "Windows" ? azurerm_virtual_machine_extension.vm_win_post_deploy_script : azurerm_virtual_machine_extension.vm_lin_post_deploy_script
+  actual_virtual_machine = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0] : azurerm_linux_virtual_machine.virtual_machine[0]
+
+  policy_name = local.managed_by_cap ? lookup({ for mapping in local.rsv_mapping : "${mapping.availability}:${mapping.env}" => mapping.policy }, "${var.availability}:${local.environment}", "DefaultPolicy") : "DefaultPolicy"
+
 }
+
+
