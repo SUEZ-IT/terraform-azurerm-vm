@@ -31,9 +31,19 @@ variable "size" {
 variable "subnet" {
   type        = string
   description = "(Optional) By default, if the 'subnet' argument is not defined, the VM will be deployed directly in the main subnet of the Cloud Bundle. However, if the 'subnet' argument is specified, the VM will be deployed in the designated subnet."
-  default = ""
+  default     = ""
 }
 
+variable "availability_zone" {
+  type        = string
+  description = "(Optional) Set the availability zone for the Virtual Machine. By default, value is empty, Azure chose the zone for the customer depending on available hardware."
+  default     = ""
+
+  validation {
+    condition     = contains(["", "1", "2", "3"], var.availability_zone)
+    error_message = "Valid values for variable availability_zone are: (\"1\", \"2\", \"3\")."
+  }
+}
 
 variable "os" {
   type = object({
@@ -147,6 +157,16 @@ variable "deployed_by" {
   validation {
     condition     = contains(["VMaaS", "Test_by_VMaaS"], var.deployed_by)
     error_message = "Valid values for var: deployed_by are: VMaaS."
+  }
+}
+
+variable "ad_domain" {
+  type        = string
+  description = "add vm on ad domain or workgroup"
+  default     = ""
+  validation {
+    condition     = contains(["workgroup", "fr.green.local", "green.local"], var.ad_domain)
+    error_message = "Valid values for var: green.local, fr.green.local or workgroup."
   }
 }
 
