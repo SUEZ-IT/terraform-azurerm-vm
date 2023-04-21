@@ -187,6 +187,12 @@ Each map should have the following fields:
   default = []
 }
 
+variable "windows_postinstall_script" {
+  description = "Path to a file that Terrafrm will copy on the VM and then execute, eg. to install a IIS server and set it up and running"
+  type        = string
+  default     = ""
+}
+
 # ================= Network ==================
 
 variable "tags_cloudguard" {
