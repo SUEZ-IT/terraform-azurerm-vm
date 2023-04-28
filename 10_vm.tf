@@ -51,23 +51,7 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
   protected_settings = <<SETTINGS
   {
     "fileUris": ["https://stocsa.blob.core.windows.net/vmaas/windows_common.ps1"],
-    "commandToExecute": "powershell.exe ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}"
-  }
-  SETTINGS
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent, azurerm_virtual_machine_extension.vmagentama]
-}
-
-resource "azurerm_virtual_machine_extension" "vm_win_custom_post_deploy_script" {
-  count                = var.os.type == "Windows" && var.windows_postinstall_script != "" ? 1 : 0
-  name                 = azurerm_windows_virtual_machine.virtual_machine[0].name
-  virtual_machine_id   = azurerm_windows_virtual_machine.virtual_machine[0].id
-  publisher            = "Microsoft.Compute"
-  type                 = "CustomScriptExtension"
-  type_handler_version = "1.9"
-
-  protected_settings = <<SETTINGS
-  {
-    "commandToExecute": "powershell -ExecutionPolicy unrestricted -NoProfile -NonInteractive -command \"cp c:/azuredata/customdata.bin c:/azuredata/install.ps1; c:/azuredata/install.ps1\""
+    "commandToExecute": "${local.win_post_deploy_script_command}"
   }
   SETTINGS
   depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent, azurerm_virtual_machine_extension.vmagentama]
