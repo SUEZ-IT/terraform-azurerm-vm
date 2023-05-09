@@ -22,7 +22,9 @@ locals {
     { image = "WindowsServer2019Datacenter", type = "Windows", version = "2019" },
     { image = "WindowsServer2022Datacenter", type = "Windows", version = "2022" },
     { image = "UbuntuServer2204", type = "Ubuntu", version = "2204" },
-    { image = "RockyLinux8", type = "Rocky", version = "8" }
+    { image = "RockyLinux8", type = "Rocky", version = "8" },
+    { image = "RedHatEnterprise9", type = "Redhat", version = "9" }
+
   ]
   osfactory_image_name = [for x in local.image_mapping : x.image if x.type == var.os.type && x.version == var.os.version]
 

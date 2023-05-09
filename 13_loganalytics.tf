@@ -10,7 +10,7 @@ resource "azurerm_virtual_machine_extension" "vmagentama" {
 }
 
 resource "azurerm_virtual_machine_extension" "vmagent" {
-  count                = local.osfactory_image_name[0] == "UbuntuServer2204" || (local.managed_by_cap == "yes" || local.managed_by_cap == "true") ? 0 : 1
+  count                = (local.osfactory_image_name[0] == "UbuntuServer2204" || local.osfactory_image_name[0] == "RedHatEnterprise9")  || (local.managed_by_cap == "yes" || local.managed_by_cap == "true") ? 0 : 1
   name                 = "vmagent"
   virtual_machine_id   = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
   publisher            = "Microsoft.EnterpriseCloud.Monitoring"

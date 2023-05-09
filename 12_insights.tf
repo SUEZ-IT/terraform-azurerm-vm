@@ -1,5 +1,5 @@
 resource "azurerm_virtual_machine_extension" "dependencyagent" {
-  count                      = contains(["UbuntuServer2204","RockyLinux8"],local.osfactory_image_name[0]) ? 0 : 1
+  count                      = contains(["UbuntuServer2204","RockyLinux8","RedHatEnterprise9"],local.osfactory_image_name[0]) ? 0 : 1
   name                       = "DependencyAgent"
   virtual_machine_id         = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
   publisher                  = "Microsoft.Azure.Monitoring.DependencyAgent"

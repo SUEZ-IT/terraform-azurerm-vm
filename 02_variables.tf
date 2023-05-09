@@ -53,8 +53,8 @@ variable "os" {
   description = "OS type and version"
 
   validation {
-    condition     = contains([{ type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2019" }, { type = "Windows", version = "2022" }, { type = "Rocky", version = "8" }], var.os)
-    error_message = "Valid values for var: os are  {type = \"Ubuntu\", version = \"2204\"}, {type = \"Windows\", version = \"2019\"}, {type = \"Windows\", version = \"2022\"}, { type = \"Rocky\", version = \"8\"})."
+    condition     = contains([{ type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2019" }, { type = "Windows", version = "2022" }, { type = "Rocky", version = "8" }, { type = "Redhat", version = "9" }], var.os)
+    error_message = "Valid values for var: os are  {type = \"Ubuntu\", version = \"2204\"}, {type = \"Windows\", version = \"2019\"}, {type = \"Windows\", version = \"2022\"}, { type = \"Rocky\", version = \"8\"}, { type = \"Redhat\", version = \"9\"})."
   }
 }
 
