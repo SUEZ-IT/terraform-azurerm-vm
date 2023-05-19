@@ -192,6 +192,25 @@ variable "windows_postinstall_script" {
   type        = string
   default     = ""
 }
+# ================= Ad tags ==================
+
+variable "wallix_client" {
+  type    = bool
+  default = false
+}
+variable "wallix_ad_account" {
+  type        = string
+  description = "This variable is mandatory when wallix_client is true"
+  default = ""
+
+}
+variable "wallix_ba_account" {
+  type        = string
+  description = "This variable is mandatory when wallix_client is true"
+  default = ""
+}
+
+
 
 # ================= Network ==================
 

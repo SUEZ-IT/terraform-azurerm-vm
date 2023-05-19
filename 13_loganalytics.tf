@@ -6,7 +6,7 @@ resource "azurerm_virtual_machine_extension" "vmagentama" {
   type                       = var.os.type == "Windows" ? "AzureMonitorWindowsAgent" : "AzureMonitorLinuxAgent"
   type_handler_version       = "1.0"
   auto_upgrade_minor_version = "true"
-  depends_on                 = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_windows_virtual_machine.virtual_machine[0], azurerm_linux_virtual_machine.virtual_machine[0]]
+  depends_on                 = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_windows_virtual_machine.virtual_machine[0], azurerm_linux_virtual_machine.virtual_machine[0],null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
 }
 
 resource "azurerm_virtual_machine_extension" "vmagent" {
@@ -29,5 +29,5 @@ SETTINGS
       "workspaceKey": "${data.azurerm_log_analytics_workspace.cloudbundle_la.primary_shared_key}"
     }
 PROTECTED_SETTINGS
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment]
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment,null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
 }

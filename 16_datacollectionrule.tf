@@ -7,6 +7,8 @@ resource "azurerm_monitor_data_collection_rule_association" "datacr" {
     azurerm_windows_virtual_machine.virtual_machine[0],
     azurerm_linux_virtual_machine.virtual_machine[0],
     azurerm_virtual_machine_extension.vmagent,
-    azurerm_virtual_machine_extension.vmagentama
+    azurerm_virtual_machine_extension.vmagentama,
+    null_resource.validation_wallix_ad,
+    null_resource.validation_wallix_ba
   ]
 }
