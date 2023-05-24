@@ -53,8 +53,8 @@ variable "os" {
   description = "OS type and version"
 
   validation {
-    condition     = contains([{ type = "Ubuntu", version = "1804" }, { type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2019" }, { type = "Windows", version = "2022" }, { type = "Rocky", version = "8" }], var.os)
-    error_message = "Valid values for var: os are ({type = \"Ubuntu\", version = \"1804\"}, {type = \"Ubuntu\", version = \"2204\"}, {type = \"Windows\", version = \"2019\"}, {type = \"Windows\", version = \"2022\"}, { type = \"Rocky\", version = \"8\"})."
+    condition     = contains([{ type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2019" }, { type = "Windows", version = "2022" }, { type = "Rocky", version = "8" }, { type = "Redhat", version = "9" }], var.os)
+    error_message = "Valid values for var: os are  {type = \"Ubuntu\", version = \"2204\"}, {type = \"Windows\", version = \"2019\"}, {type = \"Windows\", version = \"2022\"}, { type = \"Rocky\", version = \"8\"}, { type = \"Redhat\", version = \"9\"})."
   }
 }
 
@@ -186,6 +186,31 @@ Each map should have the following fields:
   }))
   default = []
 }
+
+variable "windows_postinstall_script" {
+  description = "Path to a file that Terraform will copy on the VM and then execute, eg. to install a IIS server and set it up and running"
+  type        = string
+  default     = ""
+}
+# ================= Ad tags ==================
+
+variable "wallix_client" {
+  type    = bool
+  default = false
+}
+variable "wallix_ad_account" {
+  type        = string
+  description = "This variable is mandatory when wallix_client is true"
+  default = ""
+
+}
+variable "wallix_ba_account" {
+  type        = string
+  description = "This variable is mandatory when wallix_client is true"
+  default = ""
+}
+
+
 
 # ================= Network ==================
 

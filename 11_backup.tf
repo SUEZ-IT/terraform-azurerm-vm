@@ -6,6 +6,8 @@ resource "azurerm_backup_protected_vm" "vm_backup" {
   count               = var.backup == "true" && local.environment != "SBX" ? 1:  0
   depends_on          = [
     local.actual_virtual_machine, 
-    local.post_deploy_script
+    local.post_deploy_script,
+    null_resource.validation_wallix_ad,
+    null_resource.validation_wallix_ba
   ]
 }

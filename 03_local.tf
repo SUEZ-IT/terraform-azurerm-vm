@@ -21,9 +21,10 @@ locals {
   image_mapping = [
     { image = "WindowsServer2019Datacenter", type = "Windows", version = "2019" },
     { image = "WindowsServer2022Datacenter", type = "Windows", version = "2022" },
-    { image = "UbuntuServer1804", type = "Ubuntu", version = "1804" },
     { image = "UbuntuServer2204", type = "Ubuntu", version = "2204" },
-    { image = "RockyLinux8", type = "Rocky", version = "8" }
+    { image = "RockyLinux8", type = "Rocky", version = "8" },
+    { image = "RedHatEnterprise9", type = "Redhat", version = "9" }
+
   ]
   osfactory_image_name = [for x in local.image_mapping : x.image if x.type == var.os.type && x.version == var.os.version]
 
@@ -41,6 +42,7 @@ ${templatefile(part.filepath, part.vars)}
     EOF
   ]
   cloud_init_config = base64gzip(templatefile("${path.module}/scripts/cloud-init.tpl", { cloud_init_parts = local.cloud_init_parts_rendered }))
+
   virtual_machine_tags_cblab = {
     role                       = var.role
     environment                = local.environment
@@ -67,6 +69,9 @@ ${templatefile(part.filepath, part.vars)}
     start                      = var.start != "" ? var.start : null
     stop                       = var.stop != "" ? var.stop : null
     ad_domain                  = var.ad_domain
+    wallix_client = var.wallix_client
+    wallix_ad_account          = var.wallix_ad_account
+    wallix_ba_account          = var.wallix_ba_account
   }
   validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"
   validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"]
@@ -94,6 +99,8 @@ ${templatefile(part.filepath, part.vars)}
 
   policy_name = local.managed_by_cap ? lookup({ for mapping in local.rsv_mapping : "${mapping.availability}:${mapping.env}" => mapping.policy }, "${var.availability}:${local.environment}", "DefaultPolicy") : "DefaultPolicy"
 
+  win_post_deploy_init_script_command = "powershell ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}" 
+  win_post_deploy_script_command = var.windows_postinstall_script != "" ? join(" && ", tolist([local.win_post_deploy_init_script_command, "powershell -ExecutionPolicy unrestricted -NoProfile -NonInteractive -command \\\"cp c:/azuredata/customdata.bin c:/azuredata/install.ps1; c:/azuredata/install.ps1\\\""])) : local.win_post_deploy_init_script_command 
 }
 
 

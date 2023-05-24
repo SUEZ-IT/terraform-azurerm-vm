@@ -4,6 +4,7 @@ resource "random_id" "randomId" {
   }
 
   byte_length = 8
+  depends_on         = [null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
 }
 resource "azurerm_storage_account" "vm_sa" {
   name                     = "stodiag${random_id.randomId.hex}"
@@ -17,4 +18,5 @@ resource "azurerm_storage_account" "vm_sa" {
       days = 7
     }
   }
+  depends_on         = [null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
 }
