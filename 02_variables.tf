@@ -191,6 +191,7 @@ variable "windows_postinstall_script" {
   type        = string
   default     = ""
 }
+
 # ================= Ad tags ==================
 
 variable "wallix_client" {

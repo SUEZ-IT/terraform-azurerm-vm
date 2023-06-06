@@ -100,8 +100,11 @@ ${templatefile(part.filepath, part.vars)}
 
   policy_name = local.managed_by_cap ? lookup({ for mapping in local.rsv_mapping : "${mapping.availability}:${mapping.env}" => mapping.policy }, "${var.availability}:${local.environment}", "DefaultPolicy") : "DefaultPolicy"
 
+  windows_winrm_script = "${path.module}/scripts/ConfigureWinRM.ps1"
+  win_post_deploy_scripts_path = (var.windows_postinstall_script == "" ? ["${local.windows_winrm_script}"] : ["${local.windows_winrm_script}","${var.windows_postinstall_script}"])
+
   win_post_deploy_init_script_command = "powershell ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}" 
-  win_post_deploy_script_command = var.windows_postinstall_script != "" ? join(" && ", tolist([local.win_post_deploy_init_script_command, "powershell -ExecutionPolicy unrestricted -NoProfile -NonInteractive -command \\\"cp c:/azuredata/customdata.bin c:/azuredata/install.ps1; c:/azuredata/install.ps1\\\""])) : local.win_post_deploy_init_script_command 
+  win_post_deploy_script_command = length(local.win_post_deploy_scripts_path) > 0 ? join(" && ", tolist(["powershell -ExecutionPolicy unrestricted -NoProfile -NonInteractive -command \\\"cp c:/azuredata/customdata.bin c:/azuredata/install.zip; Expand-Archive -Force -Path c:/azuredata/install.zip -DestinationPath c:/temp ; Get-ChildItem c:/temp -Filter '*.ps1' | ForEach-Object {& $_.FullName}\\\"", local.win_post_deploy_init_script_command])) : local.win_post_deploy_init_script_command 
 }
 
 

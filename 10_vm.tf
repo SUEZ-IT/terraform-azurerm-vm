@@ -21,7 +21,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
   admin_password        = azurerm_key_vault_secret.client_credentials_password.value
   tags                  = data.azurerm_resource_group.rg_target.tags["app_family"] == "Application" ? { for key, value in local.virtual_machine_tags_cbapp : key => value if value != "" } : local.virtual_machine_tags_cblab
   source_image_id       = data.azurerm_shared_image.osfactory_image.id
-  custom_data           = var.windows_postinstall_script == "" ? null : filebase64(var.windows_postinstall_script)
+  custom_data           = filebase64(data.archive_file.win_post_deploy_scripts_zipped[0].output_path)
   patch_mode            = "AutomaticByOS"
   zone                  = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
 
@@ -56,7 +56,7 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
     "commandToExecute": "${local.win_post_deploy_script_command}"
   }
   SETTINGS
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.dependencyagent, azurerm_virtual_machine_extension.vmagent, azurerm_virtual_machine_extension.vmagentama,null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment,null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
 }
 
 resource "azurerm_linux_virtual_machine" "virtual_machine" {

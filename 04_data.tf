@@ -50,3 +50,23 @@ data "azurerm_monitor_data_collection_rule" "monitordatacolrule" {
   resource_group_name = data.azurerm_recovery_services_vault.vault_backup.resource_group_name
 }
 
+
+data "template_file" "win_post_deploy_scripts_template" {
+  count = (var.os.type == "Windows" ? length(local.win_post_deploy_scripts_path) : 0)
+
+  template = "${file(element(local.win_post_deploy_scripts_path, count.index))}"
+}
+
+data "archive_file" "win_post_deploy_scripts_zipped" {
+  count = (var.os.type == "Windows" ? 1 : 0)
+  type        = "zip"
+  output_path = "${path.module}/scripts/win_post_deploy.zip"
+
+  dynamic "source" {
+    for_each = zipmap(range(length(local.win_post_deploy_scripts_path)), local.win_post_deploy_scripts_path)
+    content {
+      content  = "${data.template_file.win_post_deploy_scripts_template[source.key].rendered}"
+      filename = "${reverse(split("/", source.value))[0]}"
+    }
+  }
+}
