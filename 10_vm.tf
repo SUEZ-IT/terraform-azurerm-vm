@@ -123,7 +123,8 @@ resource "azurerm_managed_disk" "virtual_machine_data_disk" {
   storage_account_type = each.value.type
   create_option        = "Empty"
   disk_size_gb         = each.value.size
-  depends_on         = [null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
+  zone                 = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
+  depends_on           = [null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "virtual_machine_data_disk_attachment" {
