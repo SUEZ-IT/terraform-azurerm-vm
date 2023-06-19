@@ -21,7 +21,6 @@ locals {
   image_mapping = [
     { image = "WindowsServer2019Datacenter", type = "Windows", version = "2019" },
     { image = "WindowsServer2022Datacenter", type = "Windows", version = "2022" },
-    { image = "WindowsServer2022Datacenter-gen2", type = "Windows", version = "2022gen2" },
     { image = "UbuntuServer2204", type = "Ubuntu", version = "2204" },
     { image = "RockyLinux8", type = "Rocky", version = "8" },
     { image = "RedHatEnterprise9", type = "Redhat", version = "9" }
