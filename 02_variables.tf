@@ -83,15 +83,7 @@ variable "role" {
   description = "VM role => frontend, backend, etc..."
 }
 
-variable "classification" {
-  type        = string
-  description = "VM classification => application [app] or infrastructure [infra]"
-  default     = "app"
-  validation {
-    condition     = contains(["app", "infra"], var.classification)
-    error_message = "Valid values for var: classification are (app, infra)."
-  }
-}
+
 
 variable "availability" {
   type        = string

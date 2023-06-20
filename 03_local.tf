@@ -48,7 +48,7 @@ ${templatefile(part.filepath, part.vars)}
     environment                = local.environment
     reboothebdo                = var.reboothebdo
     availability               = var.availability
-    classification             = var.classification
+    classification             = (data.azurerm_resource_group.rg_target.tags["classification"] == "Application" )? "app" : "infra"
     os_type                    = var.os.type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
@@ -61,7 +61,7 @@ ${templatefile(part.filepath, part.vars)}
     environment                = local.environment
     reboothebdo                = var.reboothebdo
     availability               = var.availability
-    classification             = var.classification
+    classification             = (data.azurerm_resource_group.rg_target.tags["classification"] == "Application" )? "app" : "infra"
     os_type                    = var.os.type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
