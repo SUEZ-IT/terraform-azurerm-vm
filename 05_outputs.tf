@@ -36,3 +36,11 @@ output "subscription_name" {
   value       = data.azurerm_subscription.current.display_name
   description = "Current subscription name"
 }
+output "existing_availibility_set" {
+  value       = data.azurerm_availability_set.availability_set
+  description = "existing availibilty set"
+}
+output "created_availibility_set" {
+  value       = azurerm_availability_set.availabilityset
+  description = "created availibity set"
+}

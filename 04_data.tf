@@ -70,3 +70,10 @@ data "archive_file" "win_post_deploy_scripts_zipped" {
     }
   }
 }
+
+data "azurerm_availability_set" "availability_set" {
+  count               = var.create_availability_set   ? 0 : var.availability_set_name == "" ? 0:1
+  name                = var.availability_set_name
+  resource_group_name = data.azurerm_resource_group.rg_target.name
+  
+}

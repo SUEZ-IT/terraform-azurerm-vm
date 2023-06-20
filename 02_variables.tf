@@ -95,6 +95,17 @@ variable "availability" {
   }
 }
 
+variable "create_availability_set" {
+  type    = bool
+  description = "Create a new Availability Set and attach the Virtual Machine to it."
+  default = false
+}
+variable "availability_set_name" {
+  type    = string
+  description = "Set the existing Availabilty Set to attach it to the Virtual Machine."
+  default = ""
+}
+
 variable "reboothebdo" {
   type        = string
   description = <<EOF

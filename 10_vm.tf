@@ -24,6 +24,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
   custom_data           = filebase64(data.archive_file.win_post_deploy_scripts_zipped[0].output_path)
   patch_mode            = "AutomaticByOS"
   zone                  = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
+  availability_set_id   = var.availability_zone == "" && var.availability_set_name == "" && var.create_availability_set? azurerm_availability_set.availabilityset[0].id : length(data.azurerm_availability_set.availability_set) > 0 ? data.azurerm_availability_set.availability_set[0].id  : null
 
   dynamic "identity" {
     for_each = local.managed_by_cap ? [1] : []
@@ -74,6 +75,7 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
   custom_data                     = local.cloud_init_config
 
   zone = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
+  availability_set_id   =  var.availability_zone == "" && var.availability_set_name == "" && var.create_availability_set? azurerm_availability_set.availabilityset[0].id : length(data.azurerm_availability_set.availability_set) > 0 ? data.azurerm_availability_set.availability_set[0].id  : null
   dynamic "identity" {
     for_each = local.managed_by_cap ? [1] : []
     content {
