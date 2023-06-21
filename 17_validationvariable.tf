@@ -36,9 +36,9 @@ resource "null_resource" "validation_availability_set" {
   }
   provisioner "local-exec" {
     command =  <<EOC
-        echo "You can't have an Availability Set to true and an Availability Zone (please choose only one of them)."
+        echo "Please choose either an Availability Set or an Availability Zone, as enabling both options simultaneously is not allowed."
         exit 1
-        write-error "You can't have an Availability Set to true and an Availability Zone (please choose only one of them)."
+        write-error "Please choose either an Availability Set or an Availability Zone, as enabling both options simultaneously is not allowed."
         exit(12)
     EOC
     on_failure = fail
@@ -52,9 +52,9 @@ resource "null_resource" "validation_create_availability_set" {
   }
   provisioner "local-exec" {
     command =  <<EOC
-        echo "You can't set variable create_availability_set to true if availability_set_name not is empty."
+        echo ""You can't set the variable create_availability_set to true if availability_set_name is not empty."
         exit 1
-        write-error "You can't set variable create_availability_set to true if availability_set_name not is empty."
+        write-error ""You can't set the variable create_availability_set to true if availability_set_name is not empty."
         exit(12)
     EOC
     on_failure = fail

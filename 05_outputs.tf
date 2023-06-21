@@ -38,9 +38,9 @@ output "subscription_name" {
 }
 output "existing_availibility_set" {
   value       = data.azurerm_availability_set.availability_set
-  description = "existing availibilty set"
+  description = "Existing Availibilty Set"
 }
 output "created_availibility_set" {
   value       = azurerm_availability_set.availabilityset
-  description = "created availibity set"
+  description = "Created Availibity Set"
 }
