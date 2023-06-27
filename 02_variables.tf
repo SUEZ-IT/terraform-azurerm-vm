@@ -83,15 +83,7 @@ variable "role" {
   description = "VM role => frontend, backend, etc..."
 }
 
-variable "classification" {
-  type        = string
-  description = "VM classification => application [app] or infrastructure [infra]"
-  default     = "app"
-  validation {
-    condition     = contains(["app", "infra"], var.classification)
-    error_message = "Valid values for var: classification are (app, infra)."
-  }
-}
+
 
 variable "availability" {
   type        = string
@@ -101,6 +93,17 @@ variable "availability" {
     condition     = contains(["24/24 - 7/7", "businessday", "self-care", "sleep"], var.availability)
     error_message = "Valid values for var: availability are (24/24 - 7/7, businessday, self-care, sleep)."
   }
+}
+
+variable "create_availability_set" {
+  type    = bool
+  description = "Create a new Availability Set and attach the Virtual Machine to it."
+  default = false
+}
+variable "availability_set_name" {
+  type    = string
+  description = "Set the existing Availabilty Set to attach it to the Virtual Machine."
+  default = ""
 }
 
 variable "reboothebdo" {
@@ -192,6 +195,7 @@ variable "windows_postinstall_script" {
   type        = string
   default     = ""
 }
+
 # ================= Ad tags ==================
 
 variable "wallix_client" {

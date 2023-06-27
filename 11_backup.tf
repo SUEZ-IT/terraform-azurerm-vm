@@ -8,6 +8,8 @@ resource "azurerm_backup_protected_vm" "vm_backup" {
     local.actual_virtual_machine, 
     local.post_deploy_script,
     null_resource.validation_wallix_ad,
-    null_resource.validation_wallix_ba
+    null_resource.validation_wallix_ba,
+    null_resource.validation_create_availability_set,
+    null_resource.validation_availability_set
   ]
 }
