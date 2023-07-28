@@ -7,7 +7,7 @@ resource "azurerm_network_interface" "VmNic" {
     subnet_id                     = data.azurerm_subnet.vmsubnet.id
     private_ip_address_allocation = "Dynamic"
   }
-  depends_on         = [null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
+  depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
 
 resource "azurerm_windows_virtual_machine" "virtual_machine" {
@@ -24,13 +24,10 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
   custom_data           = filebase64(data.archive_file.win_post_deploy_scripts_zipped[0].output_path)
   patch_mode            = "AutomaticByOS"
   zone                  = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
-  availability_set_id   = var.availability_zone == "" && var.availability_set_name == "" && var.create_availability_set? azurerm_availability_set.availabilityset[0].id : length(data.azurerm_availability_set.availability_set) > 0 ? data.azurerm_availability_set.availability_set[0].id  : null
+  availability_set_id   = var.availability_zone == "" && var.availability_set_name == "" && var.create_availability_set ? azurerm_availability_set.availabilityset[0].id : length(data.azurerm_availability_set.availability_set) > 0 ? data.azurerm_availability_set.availability_set[0].id : null
 
-  dynamic "identity" {
-    for_each = local.managed_by_cap ? [1] : []
-    content {
+  identity {
       type = "SystemAssigned"
-    }
   }
   os_disk {
     name                 = "${local.vm_name}-osdisk"
@@ -40,7 +37,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
   boot_diagnostics {
     storage_account_uri = azurerm_storage_account.vm_sa.primary_blob_endpoint
   }
-  depends_on         = [null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
+  depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
 
 resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
@@ -57,7 +54,7 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
     "commandToExecute": "${local.win_post_deploy_script_command}"
   }
   SETTINGS
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment,null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
 
 resource "azurerm_linux_virtual_machine" "virtual_machine" {
@@ -74,13 +71,10 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
   source_image_id                 = data.azurerm_shared_image.osfactory_image.id
   custom_data                     = local.cloud_init_config
 
-  zone = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
-  availability_set_id   =  var.availability_zone == "" && var.availability_set_name == "" && var.create_availability_set? azurerm_availability_set.availabilityset[0].id : length(data.azurerm_availability_set.availability_set) > 0 ? data.azurerm_availability_set.availability_set[0].id  : null
-  dynamic "identity" {
-    for_each = local.managed_by_cap ? [1] : []
-    content {
+  zone                = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
+  availability_set_id = var.availability_zone == "" && var.availability_set_name == "" && var.create_availability_set ? azurerm_availability_set.availabilityset[0].id : length(data.azurerm_availability_set.availability_set) > 0 ? data.azurerm_availability_set.availability_set[0].id : null
+  identity {
       type = "SystemAssigned"
-    }
   }
   plan {
     name      = var.os.type != "Rocky" ? "" : local.plan_name
@@ -95,7 +89,7 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
   boot_diagnostics {
     storage_account_uri = azurerm_storage_account.vm_sa.primary_blob_endpoint
   }
-  depends_on         = [null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
+  depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
 
 resource "azurerm_virtual_machine_extension" "vm_lin_post_deploy_script" {
@@ -113,7 +107,7 @@ resource "azurerm_virtual_machine_extension" "vm_lin_post_deploy_script" {
   "commandToExecute": "bash ubuntu_common.sh ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}"
 }
   PROT
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.vmagent, azurerm_virtual_machine_extension.vmagentama,null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
+  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.vmagentama, null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
 
 
@@ -126,7 +120,7 @@ resource "azurerm_managed_disk" "virtual_machine_data_disk" {
   create_option        = "Empty"
   disk_size_gb         = each.value.size
   zone                 = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
-  depends_on           = [null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
+  depends_on           = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "virtual_machine_data_disk_attachment" {
@@ -135,5 +129,5 @@ resource "azurerm_virtual_machine_data_disk_attachment" "virtual_machine_data_di
   virtual_machine_id = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
   lun                = each.value.lun
   caching            = "ReadWrite"
-  depends_on         = [null_resource.validation_wallix_ad,null_resource.validation_wallix_ba]
+  depends_on         = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }

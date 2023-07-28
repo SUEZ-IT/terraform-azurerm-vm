@@ -96,14 +96,14 @@ variable "availability" {
 }
 
 variable "create_availability_set" {
-  type    = bool
+  type        = bool
   description = "Create a new Availability Set and attach the Virtual Machine to it."
-  default = false
+  default     = false
 }
 variable "availability_set_name" {
-  type    = string
+  type        = string
   description = "Set the existing Availabilty Set to attach it to the Virtual Machine."
-  default = ""
+  default     = ""
 }
 
 variable "reboothebdo" {
@@ -205,13 +205,13 @@ variable "wallix_client" {
 variable "wallix_ad_account" {
   type        = string
   description = "This variable is mandatory when wallix_client is true"
-  default = ""
+  default     = ""
 
 }
 variable "wallix_ba_account" {
   type        = string
   description = "This variable is mandatory when wallix_client is true"
-  default = ""
+  default     = ""
 }
 
 

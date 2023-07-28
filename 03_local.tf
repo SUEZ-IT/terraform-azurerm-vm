@@ -49,7 +49,7 @@ ${templatefile(part.filepath, part.vars)}
     environment                = local.environment
     reboothebdo                = var.reboothebdo
     availability               = var.availability
-    classification             = (data.azurerm_resource_group.rg_target.tags["classification"] == "Application" )? "app" : "infra"
+    classification             = (data.azurerm_resource_group.rg_target.tags["classification"] == "Application") ? "app" : "infra"
     os_type                    = var.os.type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
@@ -63,7 +63,7 @@ ${templatefile(part.filepath, part.vars)}
     environment                = local.environment
     reboothebdo                = var.reboothebdo
     availability               = var.availability
-    classification             = (data.azurerm_resource_group.rg_target.tags["classification"] == "Application" )? "app" : "infra"
+    classification             = (data.azurerm_resource_group.rg_target.tags["classification"] == "Application") ? "app" : "infra"
     os_type                    = var.os.type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
@@ -71,7 +71,7 @@ ${templatefile(part.filepath, part.vars)}
     start                      = var.start != "" ? var.start : null
     stop                       = var.stop != "" ? var.stop : null
     ad_domain                  = var.ad_domain
-    wallix_client = var.wallix_client
+    wallix_client              = var.wallix_client
     wallix_ad_account          = var.wallix_ad_account
     wallix_ba_account          = var.wallix_ba_account
     vmaas_module_version = local.vmaas_module_version 
@@ -81,6 +81,7 @@ ${templatefile(part.filepath, part.vars)}
 
   ostype                 = var.os.type == "Windows" ? "w" : "l"
   datacollectionrulename = format("am-dcr-%s-%s-%s%s", local.ostype, local.location_msp[0], local.environment, local.subscription_digit)
+  datacollectionrulename_unmanaged = format("am-dcr-%s-%s-%s", local.ostype, local.app_name, local.environment)
 
   rsv_mapping = [
     { availability = "self-care", env = "DEV", policy = "Policy1453-SelfCare-STD" },
@@ -102,11 +103,11 @@ ${templatefile(part.filepath, part.vars)}
 
   policy_name = local.managed_by_cap ? lookup({ for mapping in local.rsv_mapping : "${mapping.availability}:${mapping.env}" => mapping.policy }, "${var.availability}:${local.environment}", "DefaultPolicy") : "DefaultPolicy"
 
-  windows_winrm_script = "${path.module}/scripts/ConfigureWinRM.ps1"
-  win_post_deploy_scripts_path = (var.windows_postinstall_script == "" ? ["${local.windows_winrm_script}"] : ["${local.windows_winrm_script}","${var.windows_postinstall_script}"])
+  windows_winrm_script         = "${path.module}/scripts/ConfigureWinRM.ps1"
+  win_post_deploy_scripts_path = (var.windows_postinstall_script == "" ? ["${local.windows_winrm_script}"] : ["${local.windows_winrm_script}", "${var.windows_postinstall_script}"])
 
-  win_post_deploy_init_script_command = "powershell ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}" 
-  win_post_deploy_script_command = length(local.win_post_deploy_scripts_path) > 0 ? join(" && ", tolist(["powershell -ExecutionPolicy unrestricted -NoProfile -NonInteractive -command \\\"cp c:/azuredata/customdata.bin c:/azuredata/install.zip; Expand-Archive -Force -Path c:/azuredata/install.zip -DestinationPath c:/temp ; Get-ChildItem c:/temp -Filter '*.ps1' | ForEach-Object {& $_.FullName}\\\"", local.win_post_deploy_init_script_command])) : local.win_post_deploy_init_script_command 
+  win_post_deploy_init_script_command = "powershell ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}"
+  win_post_deploy_script_command      = length(local.win_post_deploy_scripts_path) > 0 ? join(" && ", tolist(["powershell -ExecutionPolicy unrestricted -NoProfile -NonInteractive -command \\\"cp c:/azuredata/customdata.bin c:/azuredata/install.zip; Expand-Archive -Force -Path c:/azuredata/install.zip -DestinationPath c:/temp ; Get-ChildItem c:/temp -Filter '*.ps1' | ForEach-Object {& $_.FullName}\\\"", local.win_post_deploy_init_script_command])) : local.win_post_deploy_init_script_command
 }
 
 
