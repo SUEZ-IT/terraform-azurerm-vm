@@ -47,10 +47,8 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
   publisher            = "Microsoft.Compute"
   type                 = "CustomScriptExtension"
   type_handler_version = "1.9"
-
   protected_settings = <<SETTINGS
   {
-    "fileUris": ["https://stocsa.blob.core.windows.net/vmaas/windows_common.ps1"],
     "commandToExecute": "${local.win_post_deploy_script_command}"
   }
   SETTINGS
@@ -91,25 +89,6 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
   }
   depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
-
-resource "azurerm_virtual_machine_extension" "vm_lin_post_deploy_script" {
-  count                = var.os.type != "Windows" ? 1 : 0
-  name                 = azurerm_linux_virtual_machine.virtual_machine[0].name
-  virtual_machine_id   = azurerm_linux_virtual_machine.virtual_machine[0].id
-  publisher            = "Microsoft.Azure.Extensions"
-  type                 = "CustomScript"
-  type_handler_version = "2.1"
-
-  protected_settings = <<PROT
-
-{
-  "fileUris": ["https://stocsa.blob.core.windows.net/vmaas/ubuntu_common.sh"],
-  "commandToExecute": "bash ubuntu_common.sh ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}"
-}
-  PROT
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.vmagentama, null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
-}
-
 
 resource "azurerm_managed_disk" "virtual_machine_data_disk" {
   for_each             = var.data_disk
