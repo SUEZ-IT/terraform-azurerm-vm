@@ -1,6 +1,6 @@
 locals {
   vm_name     = "S${substr(data.azurerm_resource_group.rg_target.tags["environment"], 0, 1)}${data.azurerm_resource_group.rg_target.tags["guid"]}${var.index}"
-  environment = data.azurerm_resource_group.rg_target.tags["environment"]
+  environment = lower(data.azurerm_resource_group.rg_target.tags["environment"])
   app_name    = lower(data.azurerm_resource_group.rg_target.tags["app_name"])
   location    = lower(data.azurerm_resource_group.rg_target.location)
   location_msp_mapping = [

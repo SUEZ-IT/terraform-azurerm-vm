@@ -1,5 +1,4 @@
 # ================= Azure ==================
-
 variable "resource_group_name" {
   type        = string
   description = "Target resource group name"
