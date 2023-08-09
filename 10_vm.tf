@@ -1,7 +1,7 @@
-resource "azurerm_network_interface" "VmNic" {
+resource "azurerm_network_interface" "nic" {
   name                = "nic-${local.vm_name}"
   location            = local.location
-  resource_group_name = var.resource_group_name
+  resource_group_name = var.cloudbundle_info.name
   ip_configuration {
     name                          = "nic-${local.vm_name}-conf"
     subnet_id                     = data.azurerm_subnet.vmsubnet.id
@@ -14,20 +14,20 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
   count                 = var.os.type == "Windows" ? 1 : 0
   name                  = local.vm_name
   location              = local.location
-  resource_group_name   = var.resource_group_name
-  network_interface_ids = ["${azurerm_network_interface.VmNic.id}"]
+  resource_group_name   = var.cloudbundle_info.name
+  network_interface_ids = ["${azurerm_network_interface.nic.id}"]
   size                  = var.size
   admin_username        = azurerm_key_vault_secret.client_credentials_login.value
   admin_password        = azurerm_key_vault_secret.client_credentials_password.value
-  tags                  = data.azurerm_resource_group.rg_target.tags["app_family"] == "Application" ? { for key, value in local.virtual_machine_tags_cbapp : key => value if value != "" } : local.virtual_machine_tags_cblab
+  tags                  = var.cloudbundle_info.tags["app_family"] == "Application" ? { for key, value in local.virtual_machine_tags_cbapp : key => value if value != "" } : local.virtual_machine_tags_cblab
   source_image_id       = data.azurerm_shared_image.osfactory_image.id
   custom_data           = filebase64(data.archive_file.win_post_deploy_scripts_zipped[0].output_path)
   patch_mode            = "AutomaticByOS"
   zone                  = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
-  availability_set_id   = var.availability_zone == "" && var.availability_set_name == "" && var.create_availability_set ? azurerm_availability_set.availabilityset[0].id : length(data.azurerm_availability_set.availability_set) > 0 ? data.azurerm_availability_set.availability_set[0].id : null
+  availability_set_id   = try(var.availability_set_id, null)
 
   identity {
-      type = "SystemAssigned"
+    type = "SystemAssigned"
   }
   os_disk {
     name                 = "${local.vm_name}-osdisk"
@@ -35,7 +35,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
     storage_account_type = var.os_disk_type
   }
   boot_diagnostics {
-    storage_account_uri = azurerm_storage_account.vm_sa.primary_blob_endpoint
+    storage_account_uri = azurerm_storage_account.diagnostics_sa.primary_blob_endpoint
   }
   depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
@@ -47,32 +47,32 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
   publisher            = "Microsoft.Compute"
   type                 = "CustomScriptExtension"
   type_handler_version = "1.9"
-  protected_settings = <<SETTINGS
+  protected_settings   = <<SETTINGS
   {
     "commandToExecute": "${local.win_post_deploy_script_command}"
   }
   SETTINGS
-  depends_on         = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
+  depends_on           = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
 
 resource "azurerm_linux_virtual_machine" "virtual_machine" {
   count                           = var.os.type != "Windows" ? 1 : 0
   name                            = local.vm_name
   location                        = local.location
-  resource_group_name             = var.resource_group_name
-  network_interface_ids           = ["${azurerm_network_interface.VmNic.id}"]
+  resource_group_name             = var.cloudbundle_info.name
+  network_interface_ids           = ["${azurerm_network_interface.nic.id}"]
   size                            = var.size
   admin_username                  = azurerm_key_vault_secret.client_credentials_login.value
   admin_password                  = azurerm_key_vault_secret.client_credentials_password.value
   disable_password_authentication = false
-  tags                            = data.azurerm_resource_group.rg_target.tags["app_family"] == "Application" ? { for key, value in local.virtual_machine_tags_cbapp : key => value if value != "" } : local.virtual_machine_tags_cblab
+  tags                            = var.cloudbundle_info.tags["app_family"] == "Application" ? { for key, value in local.virtual_machine_tags_cbapp : key => value if value != "" } : local.virtual_machine_tags_cblab
   source_image_id                 = data.azurerm_shared_image.osfactory_image.id
   custom_data                     = local.cloud_init_config
 
   zone                = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
-  availability_set_id = var.availability_zone == "" && var.availability_set_name == "" && var.create_availability_set ? azurerm_availability_set.availabilityset[0].id : length(data.azurerm_availability_set.availability_set) > 0 ? data.azurerm_availability_set.availability_set[0].id : null
+  availability_set_id = try(var.availability_set_id, null)
   identity {
-      type = "SystemAssigned"
+    type = "SystemAssigned"
   }
   plan {
     name      = var.os.type != "Rocky" ? "" : local.plan_name
@@ -85,7 +85,7 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
     storage_account_type = var.os_disk_type
   }
   boot_diagnostics {
-    storage_account_uri = azurerm_storage_account.vm_sa.primary_blob_endpoint
+    storage_account_uri = azurerm_storage_account.diagnostics_sa.primary_blob_endpoint
   }
   depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
@@ -94,7 +94,7 @@ resource "azurerm_managed_disk" "virtual_machine_data_disk" {
   for_each             = var.data_disk
   name                 = format("%s-datadisk-%s", "${local.vm_name}", each.value.lun)
   location             = local.location
-  resource_group_name  = var.resource_group_name
+  resource_group_name  = var.cloudbundle_info.name
   storage_account_type = each.value.type
   create_option        = "Empty"
   disk_size_gb         = each.value.size

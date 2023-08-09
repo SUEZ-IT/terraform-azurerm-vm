@@ -29,34 +29,3 @@ resource "null_resource" "validation_wallix_ba" {
     on_failure = fail
   }
 }
-resource "null_resource" "validation_availability_set" {
-  count = (var.availability_set_name != "" || var.create_availability_set) && length(var.availability_zone) != 0 ? 1 : 0
-  triggers = {
-    count = 1
-  }
-  provisioner "local-exec" {
-    command    = <<EOC
-        echo "Please choose either an Availability Set or an Availability Zone, as enabling both options simultaneously is not allowed."
-        exit 1
-        write-error "Please choose either an Availability Set or an Availability Zone, as enabling both options simultaneously is not allowed."
-        exit(12)
-    EOC
-    on_failure = fail
-  }
-}
-
-resource "null_resource" "validation_create_availability_set" {
-  count = var.availability_set_name != "" && var.create_availability_set ? 1 : 0
-  triggers = {
-    count = 1
-  }
-  provisioner "local-exec" {
-    command    = <<EOC
-        echo ""You can't set the variable create_availability_set to true if availability_set_name is not empty."
-        exit 1
-        write-error ""You can't set the variable create_availability_set to true if availability_set_name is not empty."
-        exit(12)
-    EOC
-    on_failure = fail
-  }
-}
