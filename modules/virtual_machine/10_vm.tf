@@ -35,7 +35,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
     storage_account_type = var.os_disk_type
   }
   boot_diagnostics {
-    storage_account_uri = azurerm_storage_account.diagnostics_sa.primary_blob_endpoint
+    storage_account_uri = null
   }
   depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
@@ -85,7 +85,7 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
     storage_account_type = var.os_disk_type
   }
   boot_diagnostics {
-    storage_account_uri = azurerm_storage_account.diagnostics_sa.primary_blob_endpoint
+    storage_account_uri = null
   }
   depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
 }
