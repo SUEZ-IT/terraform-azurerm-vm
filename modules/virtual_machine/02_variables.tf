@@ -300,7 +300,7 @@ variable "cloudinit_parts" {
   `filepath` - path to the file to use as a template
   `vars` - map of variables to use with the part template
   - Constraint:
-  os.type = ["Redhat" | "Ubuntu" | "Rocky"]
+  Valid values must be configured for `content-type`, `filepath`, `vars` (see the link above).
   - Example:
   ```
   cloudinit_parts = [
