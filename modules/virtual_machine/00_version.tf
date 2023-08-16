@@ -21,5 +21,10 @@ terraform {
       source  = "registry.terraform.io/hashicorp/template"
       version = "~> 2.2.0"
     }
+
+    azapi = {
+      source  = "azure/azapi"
+      version = "1.8.0"
+    }
   }
 }

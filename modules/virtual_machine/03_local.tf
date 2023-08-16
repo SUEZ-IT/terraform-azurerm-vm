@@ -2,6 +2,7 @@ locals {
   vm_name     = "S${substr(var.cloudbundle_info.tags["environment"], 0, 1)}${var.cloudbundle_info.tags["guid"]}${var.index}"
   environment = lower(var.cloudbundle_info.tags["environment"])
   app_name    = lower(var.cloudbundle_info.tags["app_name"])
+  app_family  = lower(var.cloudbundle_info.tags["app_family"])
   location    = lower(var.cloudbundle_info.location)
   location_msp_mapping = [
     { location = "northeurope", inframsp = "neu", code = "neu" },
@@ -106,4 +107,16 @@ ${templatefile(part.filepath, part.vars)}
   win_post_deploy_scripts_path = (var.windows_postinstall_script == "" ? ["${local.windows_winrm_script}"] : ["${local.windows_winrm_script}", "${var.windows_postinstall_script}"])
 
   win_post_deploy_script_command = "powershell -ExecutionPolicy unrestricted -NoProfile -NonInteractive -command \\\"cp c:/azuredata/customdata.bin c:/azuredata/install.zip; Expand-Archive -Force -Path c:/azuredata/install.zip -DestinationPath c:/temp ; Get-ChildItem c:/temp -Filter '*.ps1' | ForEach-Object {& $_.FullName}\\\""
+
+    update_management_configuration = {
+    patchSettings = {
+      assessmentMode   = "AutomaticByPlatform"
+      patchMode        = "AutomaticByPlatform"
+      provisionVMAgent = true
+
+       automaticByPlatformSettings = {
+        bypassPlatformSafetyChecksOnUserSchedule = true
+      }
+    }
+  }
 }
