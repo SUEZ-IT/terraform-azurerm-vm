@@ -108,13 +108,13 @@ ${templatefile(part.filepath, part.vars)}
 
   win_post_deploy_script_command = "powershell -ExecutionPolicy unrestricted -NoProfile -NonInteractive -command \\\"cp c:/azuredata/customdata.bin c:/azuredata/install.zip; Expand-Archive -Force -Path c:/azuredata/install.zip -DestinationPath c:/temp ; Get-ChildItem c:/temp -Filter '*.ps1' | ForEach-Object {& $_.FullName}\\\""
 
-    update_management_configuration = {
+  update_management_configuration = {
     patchSettings = {
       assessmentMode   = "AutomaticByPlatform"
       patchMode        = "AutomaticByPlatform"
       provisionVMAgent = true
 
-       automaticByPlatformSettings = {
+      automaticByPlatformSettings = {
         bypassPlatformSafetyChecksOnUserSchedule = true
       }
     }

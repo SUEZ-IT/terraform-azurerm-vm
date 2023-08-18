@@ -13,6 +13,7 @@ The README offers clear explanations of each input parameter and its constraints
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | ~> 2.4.0 |
+| <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | 1.8.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 3.50.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3.2.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.1.3 |
@@ -58,10 +59,13 @@ module "example" {
 
 | Name | Type |
 |------|------|
+| [azapi_update_resource.vm_update](https://registry.terraform.io/providers/azure/azapi/1.8.0/docs/resources/update_resource) | resource |
 | [azurerm_backup_protected_vm.backup](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/backup_protected_vm) | resource |
 | [azurerm_key_vault_secret.client_credentials_login](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.client_credentials_password](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_linux_virtual_machine.virtual_machine](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine) | resource |
+| [azurerm_maintenance_assignment_virtual_machine.vm_maintenance_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/maintenance_assignment_virtual_machine) | resource |
+| [azurerm_maintenance_configuration.vm_maintenance_configuration](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/maintenance_configuration) | resource |
 | [azurerm_managed_disk.virtual_machine_data_disk](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/managed_disk) | resource |
 | [azurerm_monitor_data_collection_rule_association.datacr](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_data_collection_rule_association) | resource |
 | [azurerm_network_interface.nic](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface) | resource |
@@ -73,7 +77,6 @@ module "example" {
 | [azurerm_windows_virtual_machine.virtual_machine](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/windows_virtual_machine) | resource |
 | null_resource.validation_wallix_ad | resource |
 | null_resource.validation_wallix_ba | resource |
-| random_id.randomId | resource |
 | random_password.client_password | resource |
 | random_string.client_login | resource |
 | archive_file.win_post_deploy_scripts_zipped | data source |
@@ -93,7 +96,7 @@ module "example" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_ad_domain"></a> [ad\_domain](#input\_ad\_domain) | **Virtual Machine target Active Directory domain name.**<br>  - Constraint:<br>  Valid values for ad\_domain are ["green.local" \| "fr.green.local" \| "workgroup"]<br>  - Example:<pre>ad_domain = "green.local"</pre> | `string` | n/a | yes |
-| <a name="input_availability"></a> [availability](#input\_availability) | **Virtual Machine desired availability.**<br>  - Constraint:<br>  Valid values for availability are ["24/24 - 7/7" \| "businessday" \| "self-care" \| "sleep" ]<br>  - Example:<pre>role = "webserver"</pre> | `string` | `"businessday"` | no |
+| <a name="input_availability"></a> [availability](#input\_availability) | **Virtual Machine desired availability.**<br>  - Constraint:<br>  Valid values for availability are ["24/24 - 7/7" \| "businessday" \| "self-care" \| "sleep" ]<br>  - Example:<pre>availability = "businessday"</pre> | `string` | `"businessday"` | no |
 | <a name="input_availability_set_id"></a> [availability\_set\_id](#input\_availability\_set\_id) | **Availability Set ID to attach the Virtual Machine to.**<br>  - Example:<pre>module "availability_set" {<br>    ...<br>  }<br><br>  module "virtual_machine" {<br>    ...<br>    availability_set_id = module.availability_set.id<br>  }</pre> | `string` | `null` | no |
 | <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | **Set the Availability Zone for the Virtual Machine.**<br>  *By default, Azure chose the zone for the customer depending on available hardware.*<br>  - Constraint:<br>  Valid values for availability\_zone are ["1" \| "2" \| "3"]<br>  - Example:<pre>availability_zone = "1"</pre> | `string` | `""` | no |
 | <a name="input_backup"></a> [backup](#input\_backup) | **Enabling Virtual Machine backup.**<br>  - Constraint:<br>  Valid values for backup are ["true" \| "false"]<br>  - Example:<pre>backup = "true"</pre> | `string` | `"false"` | no |

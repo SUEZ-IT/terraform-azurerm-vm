@@ -171,7 +171,7 @@ variable "availability" {
   Valid values for availability are ["24/24 - 7/7" | "businessday" | "self-care" | "sleep" ]
   - Example:
   ```
-  role = "webserver"
+  availability = "businessday"
   ```
   EOF
   default     = "businessday"
