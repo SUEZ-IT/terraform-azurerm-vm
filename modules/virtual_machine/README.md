@@ -22,7 +22,8 @@ The README offers clear explanations of each input parameter and its constraints
 Basic usage of this submodule is as follows:
 ```hcl
 module "example" {
-	source  = "<submodule-path>"
+	source  = "terraform-suez-modules/vm/azurerm//modules/<submodule-path>" # To be updated
+	version  = "X.X.X" # To be updated
 
 	# Required variables
 	ad_domain  = 

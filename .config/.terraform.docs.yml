@@ -17,7 +17,8 @@ content: |-
     Basic usage of this submodule is as follows:
     ```hcl
     module "example" {
-      {{"\t"}}source  = "<submodule-path>"
+      {{"\t"}}source  = "terraform-suez-modules/vm/azurerm//modules/<submodule-path>" # To be updated
+      {{"\t"}}version  = "X.X.X" # To be updated
     {{- if .Module.RequiredInputs }}
       {{"\n\t"}}# Required variables
       {{- range .Module.RequiredInputs }}

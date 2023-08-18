@@ -1,7 +1,5 @@
 terraform {
   required_version = ">= 1.0.0"
-  backend "local" {
-  }
 }
 
 provider "azurerm" {
@@ -20,13 +18,17 @@ provider "azurerm" {
 }
 
 data "azurerm_resource_group" "main" {
-  name = var.resource_group_name
+  name = "RG_NAME" # To be updated
+}
+
+locals {
+  virtual_machines_index = ["1", "2"]
 }
 
 module "availability_set" {
   source           = "../../modules/availability_set"
   cloudbundle_info = data.azurerm_resource_group.main
-  index            = var.avset_index
+  index            = 1
 }
 
 module "virtual_machine" {
@@ -34,16 +36,16 @@ module "virtual_machine" {
   providers = {
     azurerm.gallery = azurerm.gallery
   }
-  count               = 2
+  for_each            = toset(local.virtual_machines_index)
   availability_set_id = module.availability_set.id
   cloudbundle_info    = data.azurerm_resource_group.main
-  index               = "${var.index}${count.index}"
-  size                = var.size
-  os_disk_type        = var.os_disk_type
-  role                = var.role
-  ad_domain           = var.ad_domain
+  index               = each.key
+  size                = "Standard_D2s_v3"
+  os_disk_type        = "Standard_LRS"
+  role                = "example"
+  ad_domain           = "green.local"
   os = {
-    type    = var.os.type
-    version = var.os.version
+    type    = "Rocky"
+    version = "8"
   }
 }

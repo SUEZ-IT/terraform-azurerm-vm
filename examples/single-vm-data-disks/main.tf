@@ -1,7 +1,5 @@
 terraform {
   required_version = ">= 1.0.0"
-  backend "local" {
-  }
 }
 
 provider "azurerm" {
@@ -20,7 +18,7 @@ provider "azurerm" {
 }
 
 data "azurerm_resource_group" "main" {
-  name = var.resource_group_name
+  name = "RG_NAME" # To be updated
 }
 
 module "virtual_machine" {
@@ -29,14 +27,25 @@ module "virtual_machine" {
     azurerm.gallery = azurerm.gallery
   }
   cloudbundle_info = data.azurerm_resource_group.main
-  index            = var.index
-  size             = var.size
-  os_disk_type     = var.os_disk_type
-  role             = var.role
-  ad_domain        = var.ad_domain
+  index            = 123
+  size             = "Standard_D2s_v3"
+  os_disk_type     = "Standard_LRS"
+  role             = "example"
+  ad_domain        = "green.local"
   os = {
-    type    = var.os.type
-    version = var.os.version
+    type    = "Ubuntu"
+    version = "2204"
   }
-  data_disk = var.data_disk
+  data_disk = {
+    "1" = {
+      lun  = 1
+      size = 5
+      type = "Standard_LRS"
+    }
+    "2" = {
+      lun  = 2
+      size = 10
+      type = "Standard_LRS"
+    }
+  }
 }
