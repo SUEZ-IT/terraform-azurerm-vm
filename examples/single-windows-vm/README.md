@@ -1,3 +1,6 @@
+<!-- BEGIN_AUTOMATED_INFRACOST_BLOCK -->
+[![Generic badge](https://img.shields.io/badge/MonthlyCost-€127-purple.svg)](https://shields.io/)
+<!-- END_AUTOMATED_INFRACOST_BLOCK -->
 # Single Windows Virtual Machine creation example
 
 Configuration in this directory create one Windows 2022 Virtual Machine.

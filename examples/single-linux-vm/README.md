@@ -1,3 +1,6 @@
+<!-- BEGIN_AUTOMATED_INFRACOST_BLOCK -->
+[![Generic badge](https://img.shields.io/badge/MonthlyCost-€65-purple.svg)](https://shields.io/)
+<!-- END_AUTOMATED_INFRACOST_BLOCK -->
 # Single Linux Virtual Machine creation example
 
 Configuration in this directory create one Linux Virtual Machine.

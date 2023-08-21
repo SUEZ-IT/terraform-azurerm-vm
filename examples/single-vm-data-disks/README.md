@@ -1,3 +1,6 @@
+<!-- BEGIN_AUTOMATED_INFRACOST_BLOCK -->
+[![Generic badge](https://img.shields.io/badge/MonthlyCost-€68-purple.svg)](https://shields.io/)
+<!-- END_AUTOMATED_INFRACOST_BLOCK -->
 # Single Virtual Machine with two additional data disks creation example
 
 Configuration in this directory creates a single Virtual Machine with additional data disks.

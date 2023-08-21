@@ -1,3 +1,6 @@
+<!-- BEGIN_AUTOMATED_INFRACOST_BLOCK -->
+[![Generic badge](https://img.shields.io/badge/MonthlyCost-€131-purple.svg)](https://shields.io/)
+<!-- END_AUTOMATED_INFRACOST_BLOCK -->
 # Single Availability Set creation example
 
 Configuration in this directory create one Availability Set and two Virtual Machines attached to it.
