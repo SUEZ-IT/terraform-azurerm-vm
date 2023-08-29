@@ -5,12 +5,6 @@ variable "resource_group_name" {
   description = "Target resource group name"
 }
 
-variable "gallery_subscription_id" {
-  type        = string
-  description = "Azure compute gallery subscription ID"
-  default     = ""
-}
-
 # ================= Virtual Machine ==================
 
 variable "index" {
