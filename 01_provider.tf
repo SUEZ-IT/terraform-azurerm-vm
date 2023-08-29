@@ -1,6 +1,10 @@
 provider "azurerm" {
   skip_provider_registration = true
+  alias                      = "gallery"
+  subscription_id            = sort(data.azurerm_subscriptions.osfactory.subscriptions.*.subscription_id)[0]
   features {}
-  subscription_id = var.gallery_subscription_id
-  alias           = "gallery"
+}
+
+data "azurerm_subscriptions" "osfactory" {
+  display_name_prefix = "Suez IT OSFactory"
 }
