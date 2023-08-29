@@ -95,12 +95,6 @@ variable "backup" {
   }
 }
 
-variable "gallery_subscription_id" {
-  type        = string
-  description = "Azure compute gallery subscription ID"
-  default     = ""
-}
-
 # Parts to generate for cloud init
 variable "cloudinit_parts" {
   description = <<EOF
