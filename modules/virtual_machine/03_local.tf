@@ -1,8 +1,9 @@
 locals {
-  vm_name     = "S${substr(data.azurerm_resource_group.rg_target.tags["environment"], 0, 1)}${data.azurerm_resource_group.rg_target.tags["guid"]}${var.index}"
-  environment = data.azurerm_resource_group.rg_target.tags["environment"]
-  app_name    = lower(data.azurerm_resource_group.rg_target.tags["app_name"])
-  location    = lower(data.azurerm_resource_group.rg_target.location)
+  vm_name     = "S${substr(var.cloudbundle_info.tags["environment"], 0, 1)}${var.cloudbundle_info.tags["guid"]}${var.index}"
+  environment = lower(var.cloudbundle_info.tags["environment"])
+  app_name    = lower(var.cloudbundle_info.tags["app_name"])
+  app_family  = lower(var.cloudbundle_info.tags["app_family"])
+  location    = lower(var.cloudbundle_info.location)
   location_msp_mapping = [
     { location = "northeurope", inframsp = "neu", code = "neu" },
     { location = "francecentral", inframsp = "fce", code = "fce" },
@@ -11,7 +12,7 @@ locals {
   ]
   location_msp                = [for x in local.location_msp_mapping : x.inframsp if x.location == local.location]
   code_msp                    = [for x in local.location_msp_mapping : x.code if x.location == local.location]
-  managed_by_cap              = contains(["yes", "true"], lower(data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"])) ? true : false
+  managed_by_cap              = contains(["yes", "true"], lower(var.cloudbundle_info.tags["managed_by_capmsp"])) ? true : false
   subscription_digit          = substr(data.azurerm_subscription.current.display_name, 3, 2)
   plan_name                   = "free"
   plan_product                = "rockylinux"
@@ -41,27 +42,29 @@ Mime-Version: 1.0
 ${templatefile(part.filepath, part.vars)}
     EOF
   ]
-  cloud_init_config = base64gzip(templatefile("${path.module}/scripts/cloud-init.tpl", { cloud_init_parts = local.cloud_init_parts_rendered }))
+  cloud_init_config = base64gzip(templatefile("${path.module}/../../templates/cloud-init.tpl", { cloud_init_parts = local.cloud_init_parts_rendered }))
 
+  vmaas_module_version = "9.0.0"
   virtual_machine_tags_cblab = {
     role                       = var.role
     environment                = local.environment
     reboothebdo                = var.reboothebdo
     availability               = var.availability
-    classification             = (data.azurerm_resource_group.rg_target.tags["classification"] == "Application" )? "app" : "infra"
+    classification             = (var.cloudbundle_info.tags["classification"] == "Application") ? "app" : "infra"
     os_type                    = var.os.type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
     start                      = var.start != "" ? var.start : null
     stop                       = var.stop != "" ? var.stop : null
     ad_domain                  = var.ad_domain
+    vmaas_module_version       = local.vmaas_module_version
   }
   virtual_machine_tags_cbapp = {
     role                       = var.role
     environment                = local.environment
     reboothebdo                = var.reboothebdo
     availability               = var.availability
-    classification             = (data.azurerm_resource_group.rg_target.tags["classification"] == "Application" )? "app" : "infra"
+    classification             = (var.cloudbundle_info.tags["classification"] == "Application") ? "app" : "infra"
     os_type                    = var.os.type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
@@ -69,15 +72,17 @@ ${templatefile(part.filepath, part.vars)}
     start                      = var.start != "" ? var.start : null
     stop                       = var.stop != "" ? var.stop : null
     ad_domain                  = var.ad_domain
-    wallix_client = var.wallix_client
+    wallix_client              = var.wallix_client
     wallix_ad_account          = var.wallix_ad_account
     wallix_ba_account          = var.wallix_ba_account
+    vmaas_module_version       = local.vmaas_module_version
   }
   validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"
   validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"]
 
-  ostype                 = var.os.type == "Windows" ? "w" : "l"
-  datacollectionrulename = format("am-dcr-%s-%s-%s%s", local.ostype, local.location_msp[0], local.environment, local.subscription_digit)
+  ostype                           = var.os.type == "Windows" ? "w" : "l"
+  datacollectionrulename           = format("am-dcr-%s-%s-%s%s", local.ostype, local.location_msp[0], local.environment, local.subscription_digit)
+  datacollectionrulename_unmanaged = format("am-dcr-%s-%s-%s", local.ostype, local.app_name, local.environment)
 
   rsv_mapping = [
     { availability = "self-care", env = "DEV", policy = "Policy1453-SelfCare-STD" },
@@ -94,16 +99,24 @@ ${templatefile(part.filepath, part.vars)}
     { availability = "businessday", env = "PRD", policy = "Policy1453-BDay-Prod-STD" }
   ]
 
-  post_deploy_script     = var.os.type == "Windows" ? azurerm_virtual_machine_extension.vm_win_post_deploy_script : azurerm_virtual_machine_extension.vm_lin_post_deploy_script
   actual_virtual_machine = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0] : azurerm_linux_virtual_machine.virtual_machine[0]
 
   policy_name = local.managed_by_cap ? lookup({ for mapping in local.rsv_mapping : "${mapping.availability}:${mapping.env}" => mapping.policy }, "${var.availability}:${local.environment}", "DefaultPolicy") : "DefaultPolicy"
 
-  windows_winrm_script = "${path.module}/scripts/ConfigureWinRM.ps1"
-  win_post_deploy_scripts_path = (var.windows_postinstall_script == "" ? ["${local.windows_winrm_script}"] : ["${local.windows_winrm_script}","${var.windows_postinstall_script}"])
+  windows_winrm_script         = "${path.module}/../../scripts/ConfigureWinRM.ps1"
+  win_post_deploy_scripts_path = (var.windows_postinstall_script == "" ? ["${local.windows_winrm_script}"] : ["${local.windows_winrm_script}", "${var.windows_postinstall_script}"])
 
-  win_post_deploy_init_script_command = "powershell ./windows_common.ps1 ${data.azurerm_resource_group.rg_target.tags["managed_by_capmsp"]}" 
-  win_post_deploy_script_command = length(local.win_post_deploy_scripts_path) > 0 ? join(" && ", tolist(["powershell -ExecutionPolicy unrestricted -NoProfile -NonInteractive -command \\\"cp c:/azuredata/customdata.bin c:/azuredata/install.zip; Expand-Archive -Force -Path c:/azuredata/install.zip -DestinationPath c:/temp ; Get-ChildItem c:/temp -Filter '*.ps1' | ForEach-Object {& $_.FullName}\\\"", local.win_post_deploy_init_script_command])) : local.win_post_deploy_init_script_command 
+  win_post_deploy_script_command = "powershell -ExecutionPolicy unrestricted -NoProfile -NonInteractive -command \\\"cp c:/azuredata/customdata.bin c:/azuredata/install.zip; Expand-Archive -Force -Path c:/azuredata/install.zip -DestinationPath c:/temp ; Get-ChildItem c:/temp -Filter '*.ps1' | ForEach-Object {& $_.FullName}\\\""
+
+  update_management_configuration = {
+    patchSettings = {
+      assessmentMode   = "AutomaticByPlatform"
+      patchMode        = "AutomaticByPlatform"
+      provisionVMAgent = true
+
+      automaticByPlatformSettings = {
+        bypassPlatformSafetyChecksOnUserSchedule = true
+      }
+    }
+  }
 }
-
-
