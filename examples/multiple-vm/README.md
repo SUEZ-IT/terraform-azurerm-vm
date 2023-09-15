@@ -7,7 +7,7 @@ Configuration in this directory create two Virtual Machines:
 
 | Resource Type| Number | OS Type | Index | Size | OS Disk Type | Role | AD Domain
 |--|--|--|--|--|--|--|--|
-| Virtual Machine | 2 | Rocky 8 | [1, 2] | Standard_D2s_v3 | Standard_LRS | example | green.local |
+| Virtual Machine | 2 | Rocky 8 | [1, 2] | Standard_D2s_v3 | Standard_LRS | example | DomainName |
 
 <!-- BEGIN_AUTOMATED_TF_DOCS_BLOCK -->
 

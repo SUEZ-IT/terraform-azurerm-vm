@@ -32,7 +32,7 @@ module "virtual_machine" {
   size             = "Standard_D2s_v3"
   os_disk_type     = "Standard_LRS"
   role             = "example"
-  ad_domain        = "green.local"
+  ad_domain        = "DomainName"
   os = {
     type    = "Windows"
     version = "2022"

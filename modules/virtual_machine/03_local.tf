@@ -44,13 +44,13 @@ ${templatefile(part.filepath, part.vars)}
   ]
   cloud_init_config = base64gzip(templatefile("${path.module}/../../templates/cloud-init.tpl", { cloud_init_parts = local.cloud_init_parts_rendered }))
 
-  vmaas_module_version = "9.0.0"
+  vmaas_module_version = "9.0.2"
   virtual_machine_tags_cblab = {
     role                       = var.role
     environment                = local.environment
     reboothebdo                = var.reboothebdo
     availability               = var.availability
-    classification             = (var.cloudbundle_info.tags["classification"] == "Application") ? "app" : "infra"
+    classification             = var.cloudbundle_info.tags["classification"]
     os_type                    = var.os.type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
@@ -64,7 +64,7 @@ ${templatefile(part.filepath, part.vars)}
     environment                = local.environment
     reboothebdo                = var.reboothebdo
     availability               = var.availability
-    classification             = (var.cloudbundle_info.tags["classification"] == "Application") ? "app" : "infra"
+    classification             = var.cloudbundle_info.tags["classification"]
     os_type                    = var.os.type
     deployed_by                = var.deployed_by
     CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]

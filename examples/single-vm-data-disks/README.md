@@ -7,7 +7,7 @@ Configuration in this directory creates a single Virtual Machine with additional
 
 | Resource Type| Number | OS Type | Index | Size | OS Disk Type | Role | AD Domain
 |--|--|--|--|--|--|--|--|
-| Virtual Machine | 1 | Ubuntu 22.04 | 123 | Standard_D2s_v3 | Standard_LRS | example | green.local |
+| Virtual Machine | 1 | Ubuntu 22.04 | 123 | Standard_D2s_v3 | Standard_LRS | example | DomainName |
 
 | Resource Type| Number | Disk Size | Disk Type |
 |--|--|--|--|

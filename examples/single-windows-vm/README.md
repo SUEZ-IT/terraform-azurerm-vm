@@ -7,7 +7,7 @@ Configuration in this directory create one Windows 2022 Virtual Machine:
 
 | Resource Type| Number | OS Type | Index | Size | OS Disk Type | Role | AD Domain
 |--|--|--|--|--|--|--|--|
-| Virtual Machine | 1 | Windows 2022 | 123 | Standard_D2s_v3 | Standard_LRS | example | green.local |
+| Virtual Machine | 1 | Windows 2022 | 123 | Standard_D2s_v3 | Standard_LRS | example | DomainName |
 
 <!-- BEGIN_AUTOMATED_TF_DOCS_BLOCK -->
 

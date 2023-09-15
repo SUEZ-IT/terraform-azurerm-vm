@@ -343,17 +343,11 @@ variable "ad_domain" {
   type        = string
   description = <<EOF
   **Virtual Machine target Active Directory domain name.**
-  - Constraint:
-  Valid values for ad_domain are ["green.local" | "fr.green.local" | "workgroup"]
   - Example:
 ```
-ad_domain = "green.local"
+ad_domain = "DomainName"
 ```
 EOF
-  validation {
-    condition     = contains(["workgroup", "fr.green.local", "green.local"], var.ad_domain)
-    error_message = "Valid values for var: green.local, fr.green.local or workgroup."
-  }
 }
 
 # ================= Wallix bastion ==================
@@ -366,7 +360,7 @@ variable "wallix_client" {
   If `wallix_client = true`, `wallix_ad_account` and `wallix_ba_account` values must be provided to the module.
   - Example:
 ```
-ad_domain = "green.local"
+ad_domain = "DomainName"
 wallix_client = true
 wallix_ad_account = "XXXXXX"
 wallix_ba_account = "XXXXXX"
