@@ -9,7 +9,8 @@
 - [single-windows-vm](https://github.com/SUEZ-IT/terraform-azurerm-vm/tree/main/examples/single-windows-vm) - Create a single Windows Virtual Machine
 - [single-vm-data-disks](https://github.com/SUEZ-IT/terraform-azurerm-vm/tree/main/examples/single-vm-data-disks) - Create a single Virtual Machine with additional data disks
 - [single-availabilityset](https://github.com/SUEZ-IT/terraform-azurerm-vm/tree/main/examples/single-availabilityset) - Create a single Availability Set and two Virtual Machines attached to it
-- [multiple-vm](https://github.com/SUEZ-IT/terraform-azurerm-vm/tree/main/examples/multiple-vm) - Create multiple Virtual Machines
+- [multiple-vm](https://github.com/SUEZ-IT/terraform-azurerm-vm/tree/main/examples/multiple-vm) - Create multiple Virtual 
+- [play-playbook-list](https://github.com/SUEZ-IT/terraform-azurerm-vm/tree/main/examples/play-playbook-list) - Create a single Virtual Machine that plays a playbooks list
 
 <!-- BEGIN_AUTOMATED_TF_DOCS_BLOCK -->
 

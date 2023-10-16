@@ -44,11 +44,11 @@ ${templatefile(part.filepath, part.vars)}
   ]
   cloud_init_config = base64gzip(templatefile("${path.module}/../../templates/cloud-init.tpl", { cloud_init_parts = local.cloud_init_parts_rendered }))
 
-  vmaas_module_version = "9.0.2"
-  virtual_machine_tags_cblab = {
+  version = "10.0.0"
+  virtual_machine_tags_cblab = merge({
     role                       = var.role
     environment                = local.environment
-    reboothebdo                = var.reboothebdo
+    weekly_reboot              = var.weekly_reboot
     availability               = var.availability
     classification             = var.cloudbundle_info.tags["classification"]
     os_type                    = var.os.type
@@ -57,28 +57,35 @@ ${templatefile(part.filepath, part.vars)}
     start                      = var.start != "" ? var.start : null
     stop                       = var.stop != "" ? var.stop : null
     ad_domain                  = var.ad_domain
-    vmaas_module_version       = local.vmaas_module_version
-  }
-  virtual_machine_tags_cbapp = {
-    role                       = var.role
-    environment                = local.environment
-    reboothebdo                = var.reboothebdo
-    availability               = var.availability
-    classification             = var.cloudbundle_info.tags["classification"]
-    os_type                    = var.os.type
-    deployed_by                = var.deployed_by
-    CloudGuard-FusionInventory = var.tags_cloudguard["fusion_inventory"]
-    CloudGuard-Internet        = var.tags_cloudguard["internet"]
-    start                      = var.start != "" ? var.start : null
-    stop                       = var.stop != "" ? var.stop : null
-    ad_domain                  = var.ad_domain
-    wallix_client              = var.wallix_client
-    wallix_ad_account          = var.wallix_ad_account
-    wallix_ba_account          = var.wallix_ba_account
-    vmaas_module_version       = local.vmaas_module_version
-  }
-  validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"
-  validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the VM size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the VM to a size that supports Premium storage.") : "isOK"]
+    playbook_list              = var.playbook_list
+    version                    = local.version
+    start_sequence             = var.start_sequence
+    stop_sequence              = var.stop_sequence
+  }, var.tags)
+  virtual_machine_tags_cbapp = merge({
+    role                        = var.role
+    environment                 = local.environment
+    weekly_reboot               = var.weekly_reboot
+    availability                = var.availability
+    classification              = var.cloudbundle_info.tags["classification"]
+    os_type                     = var.os.type
+    deployed_by                 = var.deployed_by
+    CloudGuard-FusionInventory  = var.tags_cloudguard["fusion_inventory"]
+    CloudGuard-Internet         = var.tags_cloudguard["internet"]
+    start                       = var.start != "" ? var.start : null
+    stop                        = var.stop != "" ? var.stop : null
+    ad_domain                   = var.ad_domain
+    playbook_list               = var.playbook_list
+    is_accessible_from_bastion  = var.is_accessible_from_bastion
+    bastion_allowed_ba_entities = var.bastion_allowed_ba_entities
+    bastion_allowed_ad_entities = var.bastion_allowed_ad_entities
+    bastion_allowed_ad_groups   = var.bastion_allowed_ad_groups
+    version                     = local.version
+    start_sequence              = var.start_sequence
+    stop_sequence               = var.stop_sequence
+  }, var.tags)
+  validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the Virtual Machine size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the Virtual Machine to a size that supports Premium storage.") : "isOK"
+  validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the Virtual Machine size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the Virtual Machine to a size that supports Premium storage.") : "isOK"]
 
   ostype                           = var.os.type == "Windows" ? "w" : "l"
   datacollectionrulename           = format("am-dcr-%s-%s-%s%s", local.ostype, local.location_msp[0], local.environment, local.subscription_digit)

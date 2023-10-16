@@ -6,5 +6,5 @@ resource "azurerm_virtual_machine_extension" "dependencyagent" {
   type                       = var.os.type == "Windows" ? "DependencyAgentWindows" : "DependencyAgentLinux"
   type_handler_version       = var.os.type == "Windows" ? "9.10" : "9.5"
   auto_upgrade_minor_version = "true"
-  depends_on                 = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.agentama, null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
+  depends_on                 = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, azurerm_virtual_machine_extension.agentama, null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }

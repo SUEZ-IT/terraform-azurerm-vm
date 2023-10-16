@@ -1,13 +1,13 @@
 <!-- BEGIN_AUTOMATED_INFRACOST_BLOCK -->
 [![Generic badge](https://img.shields.io/badge/MonthlyCost-€61-purple.svg)](https://azure.microsoft.com/en-us/pricing/calculator/)
 <!-- END_AUTOMATED_INFRACOST_BLOCK -->
-# Single Linux Virtual Machine creation example
+# Single Virtual Machine with custom tags example
 
-Configuration in this directory create one Linux Virtual Machine:
+Configuration in this directory creates one Virtual Machine with additional custom tags:
 
-| Resource Type| Number | OS Type | Index | Size | OS Disk Type | Role | AD Domain
-|--|--|--|--|--|--|--|--|
-| Virtual Machine | 1 | Redhat 9 | 123 | Standard_D2s_v3 | Standard_LRS | example | DomainName |
+| Resource Type| Number | OS Type | Index | Size | OS Disk Type | Role | AD Domain | Custom Tags
+|--|--|--|--|--|--|--|--|--|
+| Virtual Machine | 1 | Rocky 8 | 123 | Standard_D2s_v3 | Standard_LRS | example | DomainName | {"key1": "value1", "key2": "value2", "key3": "value3"} |
 
 <!-- BEGIN_AUTOMATED_TF_DOCS_BLOCK -->
 

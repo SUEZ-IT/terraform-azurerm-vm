@@ -7,7 +7,7 @@ resource "azurerm_backup_protected_vm" "backup" {
   depends_on = [
     local.actual_virtual_machine,
     azurerm_virtual_machine_extension.vm_win_post_deploy_script,
-    null_resource.validation_wallix_ad,
-    null_resource.validation_wallix_ba
+    null_resource.validation_bastion_ad,
+    null_resource.validation_bastion_ba
   ]
 }

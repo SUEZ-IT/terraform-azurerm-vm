@@ -7,7 +7,7 @@ resource "azurerm_network_interface" "nic" {
     subnet_id                     = data.azurerm_subnet.vmsubnet.id
     private_ip_address_allocation = "Dynamic"
   }
-  depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
+  depends_on = [null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }
 
 resource "azurerm_windows_virtual_machine" "virtual_machine" {
@@ -37,7 +37,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
   boot_diagnostics {
     storage_account_uri = null
   }
-  depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
+  depends_on = [null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }
 
 resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
@@ -52,7 +52,7 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
     "commandToExecute": "${local.win_post_deploy_script_command}"
   }
   SETTINGS
-  depends_on           = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
+  depends_on           = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }
 
 resource "azurerm_linux_virtual_machine" "virtual_machine" {
@@ -87,7 +87,7 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
   boot_diagnostics {
     storage_account_uri = null
   }
-  depends_on = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
+  depends_on = [null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }
 
 resource "azurerm_managed_disk" "virtual_machine_data_disk" {
@@ -99,7 +99,7 @@ resource "azurerm_managed_disk" "virtual_machine_data_disk" {
   create_option        = "Empty"
   disk_size_gb         = each.value.size
   zone                 = var.availability_zone != null && var.availability_zone != "" ? var.availability_zone : null
-  depends_on           = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
+  depends_on           = [null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "virtual_machine_data_disk_attachment" {
@@ -108,5 +108,5 @@ resource "azurerm_virtual_machine_data_disk_attachment" "virtual_machine_data_di
   virtual_machine_id = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0].id : azurerm_linux_virtual_machine.virtual_machine[0].id
   lun                = each.value.lun
   caching            = "ReadWrite"
-  depends_on         = [null_resource.validation_wallix_ad, null_resource.validation_wallix_ba]
+  depends_on         = [null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }

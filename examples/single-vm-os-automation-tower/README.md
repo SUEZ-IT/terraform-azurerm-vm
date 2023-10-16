@@ -1,13 +1,13 @@
 <!-- BEGIN_AUTOMATED_INFRACOST_BLOCK -->
-[![Generic badge](https://img.shields.io/badge/MonthlyCost-€61-purple.svg)](https://azure.microsoft.com/en-us/pricing/calculator/)
+[![Generic badge](https://img.shields.io/badge/MonthlyCost-€118-purple.svg)](https://azure.microsoft.com/en-us/pricing/calculator/)
 <!-- END_AUTOMATED_INFRACOST_BLOCK -->
-# Single Linux Virtual Machine creation example
+# Single Windows Virtual Machine creation with playbook list example
 
-Configuration in this directory create one Linux Virtual Machine:
+Configuration in this directory allows for the creation of a Windows Virtual Machine and the application of two playbooks (from the OS Automation Tower marketplace) to it:
 
-| Resource Type| Number | OS Type | Index | Size | OS Disk Type | Role | AD Domain
-|--|--|--|--|--|--|--|--|
-| Virtual Machine | 1 | Redhat 9 | 123 | Standard_D2s_v3 | Standard_LRS | example | DomainName |
+| Resource Type | Number | OS Type | Index | Size | OS Disk Type | Role | AD Domain | Playbook list |
+|--|--|--|--|--|--|--|--|--|
+| Virtual Machine | 1 | Windows 2022 | 123 | Standard_D2s_v3 | Standard_LRS | example | DomainName | test_emptyfile,test_emptyfile_2 |
 
 <!-- BEGIN_AUTOMATED_TF_DOCS_BLOCK -->
 

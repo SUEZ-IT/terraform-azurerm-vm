@@ -1,4 +1,5 @@
 # ================= Azure ==================
+
 variable "cloudbundle_info" {
   description = <<EOF
   **Cloud Bundle target datasource.**
@@ -17,6 +18,7 @@ EOF
 }
 
 # ================= Virtual Machine ==================
+
 variable "index" {
   type        = number
   description = <<EOF
@@ -56,11 +58,10 @@ size = "Standard_D2s_v3"
 EOF
 }
 
-
 variable "subnet" {
   type        = string
   description = <<EOF
-  **By default, if the 'subnet' argument is not defined, the VM will be deployed directly in the main subnet of the Cloud Bundle. However, if the 'subnet' argument is specified, the VM will be deployed in the designated subnet.**
+  **By default, if the 'subnet' argument is not defined, the Virtual Machine will be deployed directly in the main subnet of the Cloud Bundle. However, if the 'subnet' argument is specified, the Virtual Machine will be deployed in the designated subnet.**
   - Example:
 ```
 subnet = "snet-testvnet-test2-dev"
@@ -162,7 +163,6 @@ role = "webserver"
 EOF
 }
 
-
 variable "availability" {
   type        = string
   description = <<EOF
@@ -200,18 +200,18 @@ EOF
   default     = null
 }
 
-variable "reboothebdo" {
+variable "weekly_reboot" {
   type        = string
   description = <<EOF
   **Virtual Machine weekly reboot.**
   *Default reboot time is every Tuesday at 4AM (2.4).*
   *Find more details here : WIKI/Cloud%20Documentation/_wiki?pageId=6263&friendlyName=How-to-automate-VM-Start-Stop-Reboot-#*
   - Constraint:
-  Valid values for reboothebdo are "[1..5].[0..23]"
+  Valid values for weekly_reboot are "[1..5].[0..23]"
   - Example:
 ```
 # Reboot every wednesday at 3AM
-reboothebdo = "3.3"
+weekly_reboot = "3.3"
 ```
 EOF
   default     = "2.4"
@@ -253,7 +253,6 @@ EOF
   default     = ""
 }
 
-
 variable "backup" {
   type        = string
   description = <<EOF
@@ -290,7 +289,80 @@ EOF
   }
 }
 
+variable "tags" {
+  type        = map(string)
+  description = <<EOF
+    **Virtual Machine user-defined tags.**
+    *Default value for this variable is null.*
+    *Find more details here : WIKI/Cloud%20Documentation/_wiki/wikis/Cloud-Documentation.wiki/7086/How-to-add-custom-tags-to-a-Virtual-Machine*
+
+    - Constraint:
+      You can apply up to 50 tags to a resource in Azure. 
+      Make sure that the number of tags does not exceed 50 when adding custom tags.
+      To access further information, please refer to https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits
+    
+    - Example: 
+  ```
+  tags = {
+    key1 = "value1"
+    key2 = "value2"
+    key3 = "value3"
+  }
+  ```
+  EOF
+  nullable    = true
+  default     = null
+}
+
+variable "start_sequence" {
+  type        = number
+  description = <<EOF
+  **Virtual Machine start scheduling sequence.**
+  *Default start sequence is null. No start sequence will be applied unless you specifically choose one*
+  *Find more details here : WIKI/Cloud%20Documentation/_wiki/wikis/Cloud-Documentation.wiki/6263/How-to-automate-VM-Start-Stop-Reboot-?anchor=advance*
+  - Constraint:
+  Valid values for start_sequence are "[1..n]", with n > 0
+  - Example:
+```
+# Start the current Virtual Machine first
+start_sequence = 1
+```
+EOF
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.start_sequence == null ? true : ( var.start_sequence > 0 )
+    error_message = "Valid values for var: start_sequence are (between 1 to n), where n > 0."
+  }
+}
+
+
+variable "stop_sequence" {
+    type        = number
+    description = <<EOF
+    **Virtual Machine shutdown scheduling sequence.**
+    *Default shutdown sequence is null. No shutdown sequence will be applied unless you specifically choose one*
+    *Find more details here : WIKI/Cloud%20Documentation/_wiki/wikis/Cloud-Documentation.wiki/6263/How-to-automate-VM-Start-Stop-Reboot-?anchor=advance*
+    - Constraint:
+    Valid values for stop_sequence are "[1..n]", with n > 0
+    - Example:
+  ```
+  # Stop the current Virtual Machine first
+  stop_sequence = 1
+  ```
+  EOF
+    nullable    = true
+    default     = null
+  
+    validation {
+      condition     = var.stop_sequence == null ? true : ( var.stop_sequence > 0 )
+      error_message = "Valid values for var: stop_sequence are (between 1 to n), where n > 0."
+    }
+}
+
 # ================= Virtual Machine post-configuration ==================
+
 variable "cloudinit_parts" {
   description = <<EOF
   **Virtual Machine cloud-init configuration for Linux Operating System.**
@@ -342,63 +414,79 @@ EOF
 variable "ad_domain" {
   type        = string
   description = <<EOF
-  **Virtual Machine target Active Directory domain name.**
+  **Virtual Machine target Active Directory domain name or workgroup.**
+  - Constraint:
+  Valid values for ad_domain are [DomainName | workgroup]
   - Example:
 ```
-ad_domain = "DomainName"
+ad_domain = "mydomain.local"
 ```
 EOF
 }
 
-# ================= Wallix bastion ==================
-variable "wallix_client" {
+# ================= Bastion ==================
+
+variable "is_accessible_from_bastion" {
   type        = bool
   description = <<EOF
-  **Add the Virtual Machine to the Wallix bastion.**
+  **Add the Virtual Machine to the bastion.**
   - Constraint:
-  Valid values for wallix_client are [true | false]
-  If `wallix_client = true`, `wallix_ad_account` and `wallix_ba_account` values must be provided to the module.
+  Valid values for is_accessible_from_bastion are [true | false]
+  If `is_accessible_from_bastion = true`, `bastion_allowed_ba_entities` value must be provided to the module.
+  If `is_accessible_from_bastion = true` and ad_domain != "workgroup" and os.type = "Windows", `bastion_allowed_ad_entities` or `bastion_allowed_ad_groups` value must be provided to the module.
   - Example:
 ```
 ad_domain = "DomainName"
-wallix_client = true
-wallix_ad_account = "XXXXXX"
-wallix_ba_account = "XXXXXX"
+is_accessible_from_bastion = true
+bastion_allowed_ba_entities = "BastionAccount1,BastionAccount2"
+bastion_allowed_ad_entities = "ADAccount1,ADAccount1"
 ```
 EOF
   default     = false
 }
-variable "wallix_ad_account" {
-  type        = string
-  description = <<EOF
-  **Existing Active Directory Application Admin account that will be used by Wallix bastion to access the Virtual Machine.**
-  - Constraint:
-  ad_domain != "workgroup"
-  Provide an existing Application Admin account on the Virtual Machine target Active Directory.
-  - Example:
-```
-wallix_ad_account = "XXXXXX"
-```
-EOF
-  default     = ""
 
-}
-variable "wallix_ba_account" {
+variable "bastion_allowed_ba_entities" {
   type        = string
   description = <<EOF
-  **Existing Wallix bastion BA account that will be used to access Wallix bastion.**
-  - Constraint:
-  ad_domain != "workgroup"
-  Provide an existing BA account.
+  **Bastion account(s) list that will be used to access bastion.**
+  Provide a list of valid bastion account(s).
   - Example:
 ```
-wallix_ba_account = "XXXXXX"
+bastion_allowed_ba_entities = "BastionAccount1,BastionAccount2"
 ```
 EOF
   default     = ""
 }
 
+variable "bastion_allowed_ad_entities" {
+  type        = string
+  description = <<EOF
+  **Active Directory Application account(s) list that will be used by bastion to access the Virtual Machine.**
+  - Constraint:
+  ad_domain != "workgroup"
+  Provide a list of valid Active Directory Application account(s) that will access the Virtual Machine.
+  - Example:
+```
+bastion_allowed_ad_entities = "ADAccount1,ADAccount1"
+```
+EOF
+  default     = ""
+}
 
+variable "bastion_allowed_ad_groups" {
+  type        = string
+  description = <<EOF
+  **Active Directory Application group(s) list that will be used by bastion to access the Virtual Machine.**
+  - Constraint:
+  ad_domain != "workgroup"
+  Provide a list of valid Active Directory Application group(s) that will access the Virtual Machine.
+  - Example:
+```
+bastion_allowed_ad_groups = "ADGroup1,ADGroup1"
+```
+EOF
+  default     = ""
+}
 
 # ================= Network ==================
 
@@ -425,4 +513,20 @@ EOF
     "fusion_inventory" = "TRUE"
     "internet"         = "REGULAR"
   }
+}
+
+# ================= AWX ==================
+
+variable "playbook_list" {
+  type        = string
+  description = <<EOF
+  **Playbook(s) from the OS Automation Tower marketplace to apply to the Virtual Machine after deployment.**
+  - Constraint:
+  The specified playbook name(s) must exist in the OS Automation Tower marketplace.
+  - Example:
+```
+playbook_list = "playbook1,playbook2"
+```
+EOF
+  default     = ""
 }

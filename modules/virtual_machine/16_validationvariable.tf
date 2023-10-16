@@ -1,31 +1,15 @@
-resource "null_resource" "validation_wallix_ad" {
-  count = ((var.wallix_client) && (length(var.wallix_ad_account) == 0) && (var.ad_domain != "workgroup")) ? 1 : 0
-  triggers = {
-    count = 1
-  }
+resource "null_resource" "validation_bastion_ba" {
+  count = var.is_accessible_from_bastion && var.bastion_allowed_ba_entities == "" ? 1 : 0
+
   provisioner "local-exec" {
-    command    = <<EOC
-          echo "wallix_ad_account can't be null or empty if wallix_client is set to true for an AD joined VM."
-          exit 1
-          write-error "wallix_ad_account can't be null or empty if wallix_client is set to true for an AD joined VM."
-          exit(12)
-        EOC
-    on_failure = fail
+    command    = "echo 'bastion_allowed_ba_entities can't be empty if is_accessible_from_bastion is set to true.' && exit 1"
   }
 }
 
-resource "null_resource" "validation_wallix_ba" {
-  count = var.wallix_client && length(var.wallix_ba_account) == 0 ? 1 : 0
-  triggers = {
-    count = 1
-  }
+resource "null_resource" "validation_bastion_ad" {
+  count = var.is_accessible_from_bastion && var.ad_domain != "workgroup" && var.os.type == "Windows" && var.bastion_allowed_ad_entities == "" && var.bastion_allowed_ad_groups == "" ? 1 : 0
+
   provisioner "local-exec" {
-    command    = <<EOC
-        echo "wallix_ba_account can't be null or empty if wallix_client is set to true."
-        exit 1
-        write-error "wallix_ba_account can't be null or empty if wallix_client is set to true."
-        exit(12)
-    EOC
-    on_failure = fail
+    command    = "echo 'bastion_allowed_ad_entities and bastion_allowed_ad_groups can't be both empty if is_accessible_from_bastion is set to true for an AD joined Windows VM.' && exit 1"
   }
 }

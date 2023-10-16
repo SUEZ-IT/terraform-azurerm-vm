@@ -1,5 +1,5 @@
 <!-- BEGIN_AUTOMATED_INFRACOST_BLOCK -->
-[![Generic badge](https://img.shields.io/badge/MonthlyCost-€131-purple.svg)](https://azure.microsoft.com/en-us/pricing/calculator/)
+[![Generic badge](https://img.shields.io/badge/MonthlyCost-€122-purple.svg)](https://azure.microsoft.com/en-us/pricing/calculator/)
 <!-- END_AUTOMATED_INFRACOST_BLOCK -->
 # Multiple Virtual Machines creation example
 
