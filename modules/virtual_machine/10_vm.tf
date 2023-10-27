@@ -52,6 +52,10 @@ resource "azurerm_virtual_machine_extension" "vm_win_post_deploy_script" {
     "commandToExecute": "${local.win_post_deploy_script_command}"
   }
   SETTINGS
+  timeouts {
+    create = "60m"
+    delete = "60m"
+  }
   depends_on           = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }
 
