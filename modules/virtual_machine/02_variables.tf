@@ -332,15 +332,15 @@ EOF
   default     = null
 
   validation {
-    condition     = var.start_sequence == null ? true : ( var.start_sequence > 0 )
+    condition     = var.start_sequence == null ? true : (var.start_sequence > 0)
     error_message = "Valid values for var: start_sequence are (between 1 to n), where n > 0."
   }
 }
 
 
 variable "stop_sequence" {
-    type        = number
-    description = <<EOF
+  type        = number
+  description = <<EOF
     **Virtual Machine shutdown scheduling sequence.**
     *Default shutdown sequence is null. No shutdown sequence will be applied unless you specifically choose one*
     *Find more details here : WIKI/Cloud%20Documentation/_wiki/wikis/Cloud-Documentation.wiki/6263/How-to-automate-VM-Start-Stop-Reboot-?anchor=advance*
@@ -352,13 +352,13 @@ variable "stop_sequence" {
   stop_sequence = 1
   ```
   EOF
-    nullable    = true
-    default     = null
-  
-    validation {
-      condition     = var.stop_sequence == null ? true : ( var.stop_sequence > 0 )
-      error_message = "Valid values for var: stop_sequence are (between 1 to n), where n > 0."
-    }
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.stop_sequence == null ? true : (var.stop_sequence > 0)
+    error_message = "Valid values for var: stop_sequence are (between 1 to n), where n > 0."
+  }
 }
 
 # ================= Virtual Machine post-configuration ==================

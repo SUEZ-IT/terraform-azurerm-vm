@@ -44,7 +44,7 @@ ${templatefile(part.filepath, part.vars)}
   ]
   cloud_init_config = base64gzip(templatefile("${path.module}/../../templates/cloud-init.tpl", { cloud_init_parts = local.cloud_init_parts_rendered }))
 
-  version = "10.0.0"
+  version = "10.1.0"
   virtual_machine_tags_cblab = merge({
     role                       = var.role
     environment                = local.environment
