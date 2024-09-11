@@ -98,7 +98,7 @@ variable "os" {
   description = <<EOF
   **Virtual Machine Operating System type and version.**
   - Constraint:
-  Valid values for os are [{ type = "Ubuntu", version = "2204" } | { type = "Windows", version = "2019" } | { type = "Windows", version = "2022" } | { type = "Rocky", version = "8" } | { type = "Redhat", version = "9" }]
+  Valid values for os are [{ type = "Ubuntu", version = "2204" } | { type = "Windows", version = "2019" } | { type = "Windows", version = "2022" } | { type = "Rocky", version = "8" } | { type = "Rocky", version = "9" } | { type = "Redhat", version = "9" }]
   - Example:
 ```
 os = {
@@ -108,8 +108,8 @@ os = {
 ```
 EOF
   validation {
-    condition     = contains([{ type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2019" }, { type = "Windows", version = "2022" }, { type = "Rocky", version = "8" }, { type = "Redhat", version = "9" }], var.os)
-    error_message = "Valid values for var: os are  {type = \"Ubuntu\", version = \"2204\"}, {type = \"Windows\", version = \"2019\"}, {type = \"Windows\", version = \"2022\"}, { type = \"Rocky\", version = \"8\"}, { type = \"Redhat\", version = \"9\"})."
+    condition     = contains([{ type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2019" }, { type = "Windows", version = "2022" }, { type = "Rocky", version = "8" }, { type = "Rocky", version = "9" } ,{ type = "Redhat", version = "9" }], var.os)
+    error_message = "Valid values for var: os are  {type = \"Ubuntu\", version = \"2204\"}, {type = \"Windows\", version = \"2019\"}, {type = \"Windows\", version = \"2022\"}, { type = \"Rocky\", version = \"8\"}, { type = \"Rocky\", version = \"9\"}, { type = \"Redhat\", version = \"9\"})."
   }
 }
 

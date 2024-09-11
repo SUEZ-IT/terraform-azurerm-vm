@@ -14,9 +14,9 @@ locals {
   code_msp                    = [for x in local.location_msp_mapping : x.code if x.location == local.location]
   managed_by_cap              = contains(["yes", "true"], lower(var.cloudbundle_info.tags["managed_by_capmsp"])) ? true : false
   subscription_digit          = substr(data.azurerm_subscription.current.display_name, 3, 2)
-  plan_name                   = "free"
-  plan_product                = "rockylinux"
-  plan_publisher              = "erockyenterprisesoftwarefoundationinc1653071250513"
+  plan_name                   = ( var.os.type == "Rocky" && var.os.version == "9" ? "9-base" :  "free" )
+  plan_product                = ( var.os.type == "Rocky" && var.os.version == "9" ? "rockylinux-x86_64" :  "rockylinux" )
+  plan_publisher              = ( var.os.type == "Rocky" && var.os.version == "9" ? "resf" :  "erockyenterprisesoftwarefoundationinc1653071250513" )
   gallery_name                = "gal_infra_os_factory"
   gallery_resource_group_name = "rg-infra-compute-gallery-northeurope"
   image_mapping = [
@@ -24,6 +24,7 @@ locals {
     { image = "WindowsServer2022Datacenter", type = "Windows", version = "2022" },
     { image = "UbuntuServer2204", type = "Ubuntu", version = "2204" },
     { image = "RockyLinux8", type = "Rocky", version = "8" },
+    { image = "RockyLinux9", type = "Rocky", version = "9" },
     { image = "RedHatEnterprise9", type = "Redhat", version = "9" }
 
   ]
