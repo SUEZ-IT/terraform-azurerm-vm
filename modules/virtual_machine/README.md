@@ -57,6 +57,8 @@ module "example" {
 	stop = ""
 	stop_sequence = null
 	subnet = ""
+	create_default_keyvault = true
+	keyvault_name = ""
 	tags = null
 	tags_cloudguard = {
   "fusion_inventory": "TRUE",
@@ -72,6 +74,7 @@ module "example" {
 |------|------|
 | [azapi_update_resource.vm_update](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/update_resource) | resource |
 | [azurerm_backup_protected_vm.backup](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/backup_protected_vm) | resource |
+| [azurerm_key_vault.default_kv](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault) | resource |
 | [azurerm_key_vault_secret.client_credentials_login](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.client_credentials_password](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_linux_virtual_machine.virtual_machine](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine) | resource |
@@ -110,7 +113,9 @@ module "example" {
 | <a name="input_availability"></a> [availability](#input\_availability) | **Virtual Machine desired availability.**<br>  - Constraint:<br>  Valid values for availability are ["24/24 - 7/7" \| "businessday" \| "self-care" \| "sleep" ]<br>  - Example:<pre>availability = "businessday"</pre> | `string` | `"businessday"` | no |
 | <a name="input_availability_set_id"></a> [availability\_set\_id](#input\_availability\_set\_id) | **Availability Set ID to attach the Virtual Machine to.**<br>  - Example:<pre>module "availability_set" {<br>  ...<br>}<br><br>module "virtual_machine" {<br>  ...<br>  availability_set_id = module.availability_set.id<br>}</pre> | `string` | `null` | no |
 | <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | **Set the Availability Zone for the Virtual Machine.**<br>  *By default, Azure chose the zone for the customer depending on available hardware.*<br>  - Constraint:<br>  Valid values for availability\_zone are ["1" \| "2" \| "3"]<br>  - Example:<pre>availability_zone = "1"</pre> | `string` | `""` | no |
-| <a name="input_backup"></a> [backup](#input\_backup) | **Enabling Virtual Machine backup.**<br>  - Constraint:<br>  Valid values for backup are ["true" \| "false"]<br>  - Example:<pre>backup = "true"</pre> | `string` | `"false"` | no |
+| <a name="input_backup"></a> [backup](#input\_backup) | **Enabling Virtual Machine backup.**<br>  - Constraint:<br>  Valid values for backup are ["true" \| "false"]<br>  - Example:<pre>backup = "true"</pre> | `string` | `""` | no |
+| <a name="input_create_default_keyvault"></a> [create\_default\_keyvault](#input\_create\_default\_keyvault) | **Whether or not a key vault should be created before deploying the virtual machine.**<br>  - Constraint:<br> Valid values for create_default_keyvault are [true | false] <br> If `create_default_keyvault = false`, `keyvault_name` value must be provided to the module.<br>  - Example:<pre>create_default_keyvault = true</pre> | `bool` | `true` | no 
+| <a name="input_keyvault_name"></a> [keyvault\_name](#input\_keyvault\_name) | **Name of an existing Azure Key Vault in which the virtual machines credentials should be stored.**<br>  - Constraint:<br> Required when create_default_keyvault is false .<br>  - Example:<pre>keyvault_name = "mycustomkv"</pre> | `string` | `""` | no |
 | <a name="input_bastion_allowed_ad_entities"></a> [bastion\_allowed\_ad\_entities](#input\_bastion\_allowed\_ad\_entities) | **Active Directory Application account(s) list that will be used by bastion to access the Virtual Machine.**<br>  - Constraint:<br>  ad\_domain != "workgroup"<br>  Provide a list of valid Active Directory Application account(s) that will access the Virtual Machine.<br>  - Example:<pre>bastion_allowed_ad_entities = "ADAccount1,ADAccount1"</pre> | `string` | `""` | no |
 | <a name="input_bastion_allowed_ad_groups"></a> [bastion\_allowed\_ad\_groups](#input\_bastion\_allowed\_ad\_groups) | **Active Directory Application group(s) list that will be used by bastion to access the Virtual Machine.**<br>  - Constraint:<br>  ad\_domain != "workgroup"<br>  Provide a list of valid Active Directory Application group(s) that will access the Virtual Machine.<br>  - Example:<pre>bastion_allowed_ad_groups = "ADGroup1,ADGroup1"</pre> | `string` | `""` | no |
 | <a name="input_bastion_allowed_ba_entities"></a> [bastion\_allowed\_ba\_entities](#input\_bastion\_allowed\_ba\_entities) | **Bastion account(s) list that will be used to access bastion.**<br>  Provide a list of valid bastion account(s).<br>  - Example:<pre>bastion_allowed_ba_entities = "BastionAccount1,BastionAccount2"</pre> | `string` | `""` | no |
@@ -144,4 +149,5 @@ module "example" {
 | <a name="output_virtual_machine_id"></a> [virtual\_machine\_id](#output\_virtual\_machine\_id) | Virtual Machine ID. |
 | <a name="output_virtual_machine_name"></a> [virtual\_machine\_name](#output\_virtual\_machine\_name) | Virtual machine name. |
 | <a name="output_virtual_machine_vnic_id"></a> [virtual\_machine\_vnic\_id](#output\_virtual\_machine\_vnic\_id) | Virtual network interface controller ID. |
+| <a name="output_kv_name"></a> [kv\_name](#output\_kv\_name) |Credentials Azure key vault Name. |
 <!-- END_AUTOMATED_TF_DOCS_BLOCK -->

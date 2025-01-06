@@ -17,6 +17,33 @@ module "virtual_machine" {
 EOF
 }
 
+variable "create_default_keyvault" {
+  type        = bool
+  description = <<EOF
+  **Whether or not a key vault should be created before deploying the virtual machine.**
+  - Constraint:
+  Valid values for create_default_keyvault are [true | false]
+  If `create_default_keyvault = false`, `keyvault_name` value must be provided to the module.
+  - Example:
+```
+create_default_keyvault = true
+```
+EOF
+  default     = true
+}
+
+variable "keyvault_name" {
+  type        = string
+  description = <<EOF
+  **Name of an existing Azure Key Vault in which the virtual machines credentials should be stored .**
+  - Example:
+```
+keyvault_name = "mycustomkv"
+```
+EOF
+  default     = ""
+}
+
 # ================= Virtual Machine ==================
 
 variable "index" {

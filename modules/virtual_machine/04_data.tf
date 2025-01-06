@@ -1,17 +1,27 @@
+data "azurerm_client_config" "current" {}
+
 data "azurerm_recovery_services_vault" "vault_backup" {
   name                = local.managed_by_cap ? "rsv-${local.environment}${local.subscription_digit}-${local.code_msp[0]}-msp-${local.subscription_digit}" : "rsv-${local.app_name}-${local.environment}"
   resource_group_name = local.managed_by_cap ? data.azurerm_resource_group.inframsp[0].name : var.cloudbundle_info.name
 }
+
 data "azurerm_backup_policy_vm" "policy" {
   name                = var.backup == false || var.availability == "" ? "DefaultPolicy" : local.policy_name
   recovery_vault_name = data.azurerm_recovery_services_vault.vault_backup.name
   resource_group_name = data.azurerm_recovery_services_vault.vault_backup.resource_group_name
 }
 
-
 data "azurerm_key_vault" "cloudbundle_kv" {
-  name                = "kv${local.app_name}${local.environment}"
+  count               = var.create_default_keyvault ? 0 : 1
+  name                = var.keyvault_name
   resource_group_name = var.cloudbundle_info.name
+
+  lifecycle {
+    precondition {
+      condition     = !var.create_default_keyvault && (var.keyvault_name != "")
+      error_message = "A value for the parameter`keyvault_name` must be provided to the module when `create_default_keyvault` is set to false "
+    }
+  }
 }
 
 data "azurerm_log_analytics_workspace" "cloudbundle_la" {
@@ -44,7 +54,6 @@ data "azurerm_monitor_data_collection_rule" "monitordatacolrule" {
   name                = local.managed_by_cap ? local.datacollectionrulename : local.datacollectionrulename_unmanaged
   resource_group_name = data.azurerm_recovery_services_vault.vault_backup.resource_group_name
 }
-
 
 data "template_file" "win_post_deploy_scripts_template" {
   count = (var.os.type == "Windows" ? length(local.win_post_deploy_scripts_path) : 0)

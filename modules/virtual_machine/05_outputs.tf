@@ -13,6 +13,11 @@ output "virtual_machine_id" {
   description = "Virtual Machine ID."
 }
 
+output "kv_name" {
+  value       = var.create_default_keyvault ? try(azurerm_key_vault.default_kv[0].name, null) : try(data.azurerm_key_vault.cloudbundle_kv[0].name, null)
+  description = "Credentials Azure key vault Name."
+}
+
 output "kv_secret_login" {
   value       = try(azurerm_key_vault_secret.client_credentials_login.name, null)
   description = "Login secret name inside the Cloud Bundle key vault."
