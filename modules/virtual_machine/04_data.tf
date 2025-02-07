@@ -18,7 +18,7 @@ data "azurerm_key_vault" "cloudbundle_kv" {
 
   lifecycle {
     precondition {
-      condition     = !var.create_default_keyvault && (var.keyvault_name != "")
+      condition     = (var.keyvault_name != "")
       error_message = "A value for the parameter`keyvault_name` must be provided to the module when `create_default_keyvault` is set to false "
     }
   }
@@ -48,11 +48,6 @@ data "azurerm_resource_group" "inframsp" {
 }
 
 data "azurerm_subscription" "current" {
-}
-
-data "azurerm_monitor_data_collection_rule" "monitordatacolrule" {
-  name                = local.managed_by_cap ? local.datacollectionrulename : local.datacollectionrulename_unmanaged
-  resource_group_name = data.azurerm_recovery_services_vault.vault_backup.resource_group_name
 }
 
 data "template_file" "win_post_deploy_scripts_template" {

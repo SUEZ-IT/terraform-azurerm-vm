@@ -451,6 +451,40 @@ ad_domain = "mydomain.local"
 EOF
 }
 
+variable "remote_desktop_readers" {
+  type        = string
+  description = <<EOF
+  **Comma separated list of read only users to add to the Remote Desktop Users group.**
+  - Constraint:
+  The specified user names must be existing privileged accounts.
+
+  - Example:
+```
+remote_desktop_readers = "account1, account2"
+```
+EOF
+
+  default     = ""
+   
+}
+
+variable "remote_desktop_administrators" {
+  type        = string
+  description = <<EOF
+  **Comma separated list of users with administrator permission to add to the Remote Desktop Users group.**
+  - Constraint:
+  The specified user names must be existing privileged accounts.
+
+  - Example:
+```
+remote_desktop_administrators = "account1, account2"
+```
+EOF
+
+  default     = ""
+   
+}
+
 # ================= Bastion ==================
 
 variable "is_accessible_from_bastion" {
