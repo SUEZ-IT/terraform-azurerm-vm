@@ -79,9 +79,9 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
     type = "SystemAssigned"
   }
   plan {
-    name      = var.os.type != "Rocky" ? "" : local.plan_name
-    product   = var.os.type != "Rocky" ? "" : local.plan_product
-    publisher = var.os.type != "Rocky" ? "" : local.plan_publisher
+    name      = var.os.type == "Rocky" && var.os.version == "9" ? local.plan_name : "" 
+    product   = var.os.type == "Rocky" && var.os.version == "9" ? local.plan_product : ""
+    publisher = var.os.type == "Rocky" && var.os.version == "9" ? local.plan_publisher : ""
   }
   os_disk {
     name                 = "${local.vm_name}-osdisk"

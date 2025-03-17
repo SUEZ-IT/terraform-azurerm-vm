@@ -14,11 +14,11 @@ locals {
   code_msp                    = [for x in local.location_msp_mapping : x.code if x.location == local.location]
   managed_by_cap              = contains(["yes", "true"], lower(var.cloudbundle_info.tags["managed_by_capmsp"])) ? true : false
   subscription_digit          = substr(data.azurerm_subscription.current.display_name, 3, 2)
-  plan_name                   = ( var.os.type == "Rocky" && var.os.version == "9" ? "9-base" :  "free" )
-  plan_product                = ( var.os.type == "Rocky" && var.os.version == "9" ? "rockylinux-x86_64" :  "rockylinux" )
-  plan_publisher              = ( var.os.type == "Rocky" && var.os.version == "9" ? "resf" :  "erockyenterprisesoftwarefoundationinc1653071250513" )
-  gallery_name                = "gal_infra_os_factory"
-  gallery_resource_group_name = "rg-infra-compute-gallery-northeurope"
+  plan_name                   = ( var.os.type == "Rocky" && var.os.version == "9" ? "9-base" :  "8-base" )
+  plan_product                = "rockylinux-x86_64"
+  plan_publisher              = "resf"
+  gallery_name                = "gal_infra_os_factory_dev"
+  gallery_resource_group_name = "rg-infra-compute-gallery-dev-northeurope"
   image_mapping = [
     { image = "WindowsServer2019Datacenter", type = "Windows", version = "2019" },
     { image = "WindowsServer2022Datacenter", type = "Windows", version = "2022" },
