@@ -1,5 +1,5 @@
 locals {
-  vm_name     = "S${substr(var.cloudbundle_info.tags["environment"], 0, 1)}${var.cloudbundle_info.tags["guid"]}${var.index}"
+  vm_name     = "S${substr(upper(var.cloudbundle_info.tags["environment"]), 0, 1)}${var.cloudbundle_info.tags["guid"]}${var.index}"
   environment = lower(var.cloudbundle_info.tags["environment"])
   app_name    = lower(var.cloudbundle_info.tags["app_name"])
   app_family  = lower(var.cloudbundle_info.tags["app_family"])
