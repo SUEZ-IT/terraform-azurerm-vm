@@ -17,8 +17,9 @@ locals {
   plan_name                   = ( var.os.type == "Rocky" && var.os.version == "9" ? "9-base" :  "8-base" )
   plan_product                = "rockylinux-x86_64"
   plan_publisher              = "resf"
-  gallery_name                = "gal_infra_os_factory_dev"
-  gallery_resource_group_name = "rg-infra-compute-gallery-dev-northeurope"
+  gallery_name                = "gal_infra_os_factory"
+  gallery_resource_group_name = "rg-infra-compute-gallery-northeurope"
+  
   image_mapping = [
     { image = "WindowsServer2019Datacenter", type = "Windows", version = "2019" },
     { image = "WindowsServer2022Datacenter", type = "Windows", version = "2022" },

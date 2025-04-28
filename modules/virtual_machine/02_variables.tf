@@ -83,6 +83,11 @@ variable "size" {
 size = "Standard_D2s_v3"
 ```
 EOF
+
+  validation {
+    condition     = !contains(["Standard_B2ats_v2", "Standard_B2ts_v2", "Standard_B1ls", "Standard_B1s"], var.size)
+    error_message = "This size is not allowed. Please, select any size that have a Ram > 1"
+  }
 }
 
 variable "subnet" {
