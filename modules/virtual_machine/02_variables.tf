@@ -470,7 +470,7 @@ remote_desktop_readers = "account1, account2"
 EOF
 
   default     = ""
-   
+
 }
 
 variable "remote_desktop_administrators" {
@@ -487,8 +487,9 @@ remote_desktop_administrators = "account1, account2"
 EOF
 
   default     = ""
-   
+
 }
+
 
 # ================= Bastion ==================
 

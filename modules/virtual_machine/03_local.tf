@@ -19,6 +19,8 @@ locals {
   plan_publisher              = "resf"
   gallery_name                = "gal_infra_os_factory"
   gallery_resource_group_name = "rg-infra-compute-gallery-northeurope"
+  group_RO                    = "SG-GLOB-VMaaS-${var.cloudbundle_info.name}-${local.vm_name}-RO"
+  group_RW                    = "SG-GLOB-VMaaS-${var.cloudbundle_info.name}-${local.vm_name}-RW"
   
   image_mapping = [
     { image = "WindowsServer2019Datacenter", type = "Windows", version = "2019" },
@@ -65,8 +67,10 @@ ${templatefile(part.filepath, part.vars)}
     stop_sequence                 = var.stop_sequence
     is_default_keyvault_created   = var.create_default_keyvault
     client_keyvault_name          = (!var.create_default_keyvault && var.keyvault_name != "") ? var.keyvault_name : null
-    remote_desktop_readers        = (length(trimspace(var.remote_desktop_readers)) > 0) ? trimspace(var.remote_desktop_readers) : null
-    remote_desktop_administrators = (length(trimspace(var.remote_desktop_administrators)) > 0) ? trimspace(var.remote_desktop_administrators) : null
+    remote_desktop_readers        = (length(trimspace(var.remote_desktop_readers)) > 0) ? lower(trimspace(var.remote_desktop_readers)) : null
+    remote_desktop_administrators = (length(trimspace(var.remote_desktop_administrators)) > 0) ? lower(trimspace(var.remote_desktop_administrators)) : null
+    local_group_RO                = (length(trimspace(var.remote_desktop_readers)) > 0) ? local.group_RO : null
+    local_group_RW                = (length(trimspace(var.remote_desktop_readers)) > 0) ? local.group_RW : null
   }, var.tags)
   virtual_machine_tags_cbapp = merge({
     role                          = var.role
@@ -91,8 +95,10 @@ ${templatefile(part.filepath, part.vars)}
     stop_sequence                 = var.stop_sequence
     is_default_keyvault_created   = var.create_default_keyvault
     client_keyvault_name          = (!var.create_default_keyvault && var.keyvault_name != "") ? var.keyvault_name : null
-    remote_desktop_readers        = (length(trimspace(var.remote_desktop_readers)) > 0) ? trimspace(var.remote_desktop_readers) : null
-    remote_desktop_administrators = (length(trimspace(var.remote_desktop_administrators)) > 0) ? trimspace(var.remote_desktop_administrators) : null
+    remote_desktop_readers        = (length(trimspace(var.remote_desktop_readers)) > 0)  ? lower(trimspace(var.remote_desktop_readers)) : null
+    remote_desktop_administrators = (length(trimspace(var.remote_desktop_administrators)) > 0) ? lower(trimspace(var.remote_desktop_administrators)) : null
+    local_group_RO                = (length(trimspace(var.remote_desktop_readers)) > 0) ? local.group_RO : null
+    local_group_RW                = (length(trimspace(var.remote_desktop_administrators)) > 0) ? local.group_RW : null
   }, var.tags)
   validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the Virtual Machine size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the Virtual Machine to a size that supports Premium storage.") : "isOK"
   validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the Virtual Machine size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the Virtual Machine to a size that supports Premium storage.") : "isOK"]
