@@ -27,3 +27,20 @@ output "kv_secret_password" {
   value       = try(azurerm_key_vault_secret.client_credentials_password.name, null)
   description = "Password secret name inside the Cloud Bundle key vault."
 }
+
+
+output "AlertingInformationVmaas" {
+  value = <<EOT
+    ⚠️  WARNING: Dear VMaaS user, the implementation of the new Hosting Policy requires that any new virtual machine creation obtain an exemption.
+
+    Please refer to the Hosting Policy portal on the IT Architecture Reference site.
+
+    To request an exemption, contact: dl-glob-it-gis-gts-ats@suez.com.
+
+    ➡️  You must submit your VM exemptions BEFORE running the VMaaS Terraform module.
+
+    — The VMaaS Team
+    EOT
+
+  description = "Message for VMaaS end users"
+}

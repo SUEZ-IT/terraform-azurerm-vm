@@ -90,8 +90,3 @@ resource "null_resource" "validation_bastion_ad" {
     command = "echo 'bastion_allowed_ad_entities and bastion_allowed_ad_groups can't be both empty if is_accessible_from_bastion is set to true for an AD joined Windows VM.' && exit 1"
   }
 }
-
-
-
-
-

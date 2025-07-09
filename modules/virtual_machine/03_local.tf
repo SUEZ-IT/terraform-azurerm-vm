@@ -4,15 +4,18 @@ locals {
   app_name    = lower(var.cloudbundle_info.tags["app_name"])
   app_family  = lower(var.cloudbundle_info.tags["app_family"])
   location    = lower(var.cloudbundle_info.location)
+  is_managed_by_capmsp = can(regex("capmsp", lower(var.cloudbundle_info.tags["operating_mode"]))) 
+
   location_msp_mapping = [
     { location = "northeurope", inframsp = "neu", code = "neu" },
     { location = "francecentral", inframsp = "fce", code = "fce" },
     { location = "australiaeast", inframsp = "australiaeast", code = "aea" },
     { location = "germanywestcentral", inframsp = "germanywestcentral", code = "gwc" }
   ]
+
   location_msp                = [for x in local.location_msp_mapping : x.inframsp if x.location == local.location]
   code_msp                    = [for x in local.location_msp_mapping : x.code if x.location == local.location]
-  managed_by_cap              = contains(["yes", "true"], lower(var.cloudbundle_info.tags["managed_by_capmsp"])) ? true : false
+  managed_by_cap              = contains(["yes", true], local.is_managed_by_capmsp) ? true : false
   subscription_digit          = substr(data.azurerm_subscription.current.display_name, 3, 2)
   plan_name                   = ( var.os.type == "Rocky" && var.os.version == "9" ? "9-base" :  "8-base" )
   plan_product                = "rockylinux-x86_64"
@@ -23,7 +26,6 @@ locals {
   group_RW                    = "SG-GLOB-VMaaS-${var.cloudbundle_info.name}-${local.vm_name}-RW"
   
   image_mapping = [
-    { image = "WindowsServer2019Datacenter", type = "Windows", version = "2019" },
     { image = "WindowsServer2022Datacenter", type = "Windows", version = "2022" },
     { image = "UbuntuServer2204", type = "Ubuntu", version = "2204" },
     { image = "RockyLinux8", type = "Rocky", version = "8" },
@@ -54,7 +56,6 @@ ${templatefile(part.filepath, part.vars)}
     environment                   = local.environment
     weekly_reboot                 = var.weekly_reboot
     availability                  = var.availability
-    classification                = var.cloudbundle_info.tags["classification"]
     os_type                       = var.os.type
     deployed_by                   = var.deployed_by
     CloudGuard-FusionInventory    = var.tags_cloudguard["fusion_inventory"]
@@ -77,7 +78,6 @@ ${templatefile(part.filepath, part.vars)}
     environment                   = local.environment
     weekly_reboot                 = var.weekly_reboot
     availability                  = var.availability
-    classification                = var.cloudbundle_info.tags["classification"]
     os_type                       = var.os.type
     deployed_by                   = var.deployed_by
     CloudGuard-FusionInventory    = var.tags_cloudguard["fusion_inventory"]
