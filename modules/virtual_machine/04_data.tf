@@ -1,12 +1,12 @@
 data "azurerm_client_config" "current" {}
 
 data "azurerm_recovery_services_vault" "vault_backup" {
-  name                = local.managed_by_cap ? "rsv-${local.environment}${local.subscription_digit}-${local.code_msp[0]}-msp-${local.subscription_digit}" : "rsv-${local.app_name}-${local.environment}"
-  resource_group_name = local.managed_by_cap ? data.azurerm_resource_group.inframsp[0].name : var.cloudbundle_info.name
+  name                = local.vault_backup_name
+  resource_group_name = local.vault_backup_rg_name
 }
 
 data "azurerm_backup_policy_vm" "policy" {
-  name                = var.backup == false || var.availability == "" ? "DefaultPolicy" : local.policy_name
+  name                = local.default_backup_policy_name
   recovery_vault_name = data.azurerm_recovery_services_vault.vault_backup.name
   resource_group_name = data.azurerm_recovery_services_vault.vault_backup.resource_group_name
 }
@@ -15,7 +15,6 @@ data "azurerm_key_vault" "cloudbundle_kv" {
   count               = var.create_default_keyvault ? 0 : 1
   name                = var.keyvault_name
   resource_group_name = var.cloudbundle_info.name
-
   lifecycle {
     precondition {
       condition     = (var.keyvault_name != "")

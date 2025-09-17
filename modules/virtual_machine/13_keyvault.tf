@@ -15,7 +15,7 @@ resource "random_password" "client_password" {
   min_upper        = 1
   number           = true
   min_numeric      = 1
-  depends_on = [null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
+  depends_on       = [null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }
 
 resource "azurerm_key_vault" "default_kv" {
@@ -75,7 +75,7 @@ resource "azapi_update_resource" "default_kv_enable_access" {
     ignore_changes = all
   }
 
-  depends_on   = [azurerm_private_endpoint.default_kv_pe]
+  depends_on = [azurerm_private_endpoint.default_kv_pe]
 
 }
 
@@ -105,6 +105,6 @@ resource "azapi_update_resource" "default_kv_disable_access" {
     }
   })
 
-  depends_on   = [azurerm_key_vault_secret.client_credentials_password, azurerm_key_vault_secret.client_credentials_login]
+  depends_on = [azurerm_key_vault_secret.client_credentials_password, azurerm_key_vault_secret.client_credentials_login]
 
 }

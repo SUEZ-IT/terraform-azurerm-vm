@@ -140,7 +140,7 @@ os = {
 ```
 EOF
   validation {
-    condition     = contains([{ type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2022" }, { type = "Rocky", version = "8" }, { type = "Rocky", version = "9" } ,{ type = "Redhat", version = "9" }], var.os)
+    condition     = contains([{ type = "Ubuntu", version = "2204" }, { type = "Windows", version = "2022" }, { type = "Rocky", version = "8" }, { type = "Rocky", version = "9" }, { type = "Redhat", version = "9" }], var.os)
     error_message = "Valid values for var: os are  {type = \"Ubuntu\", version = \"2204\"}, {type = \"Windows\", version = \"2022\"}, { type = \"Rocky\", version = \"8\"}, { type = \"Rocky\", version = \"9\"}, { type = \"Redhat\", version = \"9\"})."
   }
 }
@@ -161,7 +161,7 @@ data_disk = {
     type = "Standard_LRS"
     size = 5
   }
-} 
+}
 ```
 EOF
   default     = {}
@@ -296,7 +296,7 @@ variable "backup" {
 backup = "true"
 ```
 EOF
-  default     = "false"
+  default     = "true"
   validation {
     condition     = contains(["false", "true"], var.backup)
     error_message = "Valid values for var: backup are (true, false)."
@@ -329,11 +329,11 @@ variable "tags" {
     *Find more details here : WIKI/Cloud%20Documentation/_wiki/wikis/Cloud-Documentation.wiki/7086/How-to-add-custom-tags-to-a-Virtual-Machine*
 
     - Constraint:
-      You can apply up to 50 tags to a resource in Azure. 
+      You can apply up to 50 tags to a resource in Azure.
       Make sure that the number of tags does not exceed 50 when adding custom tags.
       To access further information, please refer to https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits
-    
-    - Example: 
+
+    - Example:
   ```
   tags = {
     key1 = "value1"
@@ -469,7 +469,7 @@ remote_desktop_readers = "account1, account2"
 ```
 EOF
 
-  default     = ""
+  default = ""
 
 }
 
@@ -486,7 +486,7 @@ remote_desktop_administrators = "account1, account2"
 ```
 EOF
 
-  default     = ""
+  default = ""
 
 }
 
@@ -563,7 +563,7 @@ variable "tags_cloudguard" {
   **Open network flows for the Virtual Machine**
   *Find more details here: WIKI/Cloud%20Documentation/_wiki/wikis/Cloud-Documentation.wiki/6066/From-OS-Shared-Image-Gallery?anchor=set-virtual-machine%27s-tags#*
   - Constraint:
-  Valid values for tags_cloudguard are 
+  Valid values for tags_cloudguard are
   [{
     "fusion_inventory" = ["TRUE" | "FALSE"]
     "internet"         = ["REGULAR" | "LARGE"]

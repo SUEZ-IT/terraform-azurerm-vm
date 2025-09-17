@@ -1,10 +1,10 @@
 locals {
-  vm_name     = "S${substr(upper(var.cloudbundle_info.tags["environment"]), 0, 1)}${var.cloudbundle_info.tags["guid"]}${var.index}"
-  environment = lower(var.cloudbundle_info.tags["environment"])
-  app_name    = lower(var.cloudbundle_info.tags["app_name"])
-  app_family  = lower(var.cloudbundle_info.tags["app_family"])
-  location    = lower(var.cloudbundle_info.location)
-  is_managed_by_capmsp = can(regex("capmsp", lower(var.cloudbundle_info.tags["operating_mode"]))) 
+  vm_name              = "S${substr(upper(var.cloudbundle_info.tags["environment"]), 0, 1)}${var.cloudbundle_info.tags["guid"]}${var.index}"
+  environment          = lower(var.cloudbundle_info.tags["environment"])
+  app_name             = lower(var.cloudbundle_info.tags["app_name"])
+  app_family           = lower(var.cloudbundle_info.tags["app_family"])
+  location             = lower(var.cloudbundle_info.location)
+  service_level        = lower(var.cloudbundle_info.tags["service_level"])
 
   location_msp_mapping = [
     { location = "northeurope", inframsp = "neu", code = "neu" },
@@ -15,16 +15,16 @@ locals {
 
   location_msp                = [for x in local.location_msp_mapping : x.inframsp if x.location == local.location]
   code_msp                    = [for x in local.location_msp_mapping : x.code if x.location == local.location]
-  managed_by_cap              = contains(["yes", true], local.is_managed_by_capmsp) ? true : false
+  managed_by_cap              = strcontains(lower(coalesce(var.cloudbundle_info.tags["operating_mode"], "it-gis-cde:it-gis-cde:unknown")), "capmsp")
   subscription_digit          = substr(data.azurerm_subscription.current.display_name, 3, 2)
-  plan_name                   = ( var.os.type == "Rocky" && var.os.version == "9" ? "9-base" :  "8-base" )
+  plan_name                   = (var.os.type == "Rocky" && var.os.version == "9" ? "9-base" : "8-base")
   plan_product                = "rockylinux-x86_64"
   plan_publisher              = "resf"
   gallery_name                = "gal_infra_os_factory"
   gallery_resource_group_name = "rg-infra-compute-gallery-northeurope"
   group_RO                    = "SG-GLOB-VMaaS-${var.cloudbundle_info.name}-${local.vm_name}-RO"
   group_RW                    = "SG-GLOB-VMaaS-${var.cloudbundle_info.name}-${local.vm_name}-RW"
-  
+
   image_mapping = [
     { image = "WindowsServer2022Datacenter", type = "Windows", version = "2022" },
     { image = "UbuntuServer2204", type = "Ubuntu", version = "2204" },
@@ -95,7 +95,7 @@ ${templatefile(part.filepath, part.vars)}
     stop_sequence                 = var.stop_sequence
     is_default_keyvault_created   = var.create_default_keyvault
     client_keyvault_name          = (!var.create_default_keyvault && var.keyvault_name != "") ? var.keyvault_name : null
-    remote_desktop_readers        = (length(trimspace(var.remote_desktop_readers)) > 0)  ? lower(trimspace(var.remote_desktop_readers)) : null
+    remote_desktop_readers        = (length(trimspace(var.remote_desktop_readers)) > 0) ? lower(trimspace(var.remote_desktop_readers)) : null
     remote_desktop_administrators = (length(trimspace(var.remote_desktop_administrators)) > 0) ? lower(trimspace(var.remote_desktop_administrators)) : null
     local_group_RO                = (length(trimspace(var.remote_desktop_readers)) > 0) ? local.group_RO : null
     local_group_RW                = (length(trimspace(var.remote_desktop_administrators)) > 0) ? local.group_RW : null
@@ -103,24 +103,36 @@ ${templatefile(part.filepath, part.vars)}
   validate_os_disk_type = length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], var.os_disk_type) ? "isOK" : tobool("Requested operation cannot be performed because the Virtual Machine size (${var.size}) does not support the storage account type ${var.os_disk_type}. Consider updating the Virtual Machine to a size that supports Premium storage.") : "isOK"
   validate_data_disk    = [for disk in var.data_disk : length(regexall("[^.].*[sS].*", var.size)) == 0 ? contains(["Standard_LRS", "StandardSSD_LRS", "StandardSSD_ZRS"], disk.type) ? "isOK" : tobool("Requested operation cannot be performed because the Virtual Machine size (${var.size}) does not support the storage account type ${disk.type}. Consider updating the Virtual Machine to a size that supports Premium storage.") : "isOK"]
 
-  rsv_mapping = [
-    { availability = "self-care", env = "DEV", policy = "Policy1453-SelfCare-STD" },
-    { availability = "self-care", env = "REC", policy = "Policy1453-SelfCare-STD" },
-    { availability = "self-care", env = "HML", policy = "Policy1453-SelfCare-STD" },
-    { availability = "self-care", env = "PRD", policy = "Policy1453-SelfCare-STD" },
-    { availability = "24/24 - 7/7", env = "DEV", policy = "Policy1453-247-NonProd-STD" },
-    { availability = "24/24 - 7/7", env = "REC", policy = "Policy1453-247-NonProd-STD" },
-    { availability = "24/24 - 7/7", env = "HML", policy = "Policy1453-247-NonProd-STD" },
-    { availability = "24/24 - 7/7", env = "PRD", policy = "Policy1453-247-Prod-STD" },
-    { availability = "businessday", env = "DEV", policy = "Policy1453-BDay-OutProd-STD" },
-    { availability = "businessday", env = "REC", policy = "Policy1453-BDay-OutProd-STD" },
-    { availability = "businessday", env = "HML", policy = "Policy1453-BDay-OutProd-STD" },
-    { availability = "businessday", env = "PRD", policy = "Policy1453-BDay-Prod-STD" }
-  ]
+  # Backup locals
+  vault_redundancy_suffix = contains(["gold", "platinum"], local.service_level) ? "" : "-zrs"
+  vault_backup_name = local.managed_by_cap ? "rsv-${local.environment}${local.subscription_digit}-${local.code_msp[0]}-msp-${local.subscription_digit}${local.vault_redundancy_suffix}" : "rsv-${local.app_name}-${local.environment}"
+  vault_backup_rg_name =  local.managed_by_cap ? data.azurerm_resource_group.inframsp[0].name : var.cloudbundle_info.name
+  backup_policy_mapping = {
+    "dev" = {
+      "bronze" = "noprd-weekly",
+      "silver" = "noprd-daily",
+      "gold" = "noprd-daily",
+      "platinum" = "noprd-daily"
+    },
+    "rec" = {
+      "bronze" = "noprd-weekly",
+      "silver" = "noprd-daily",
+      "gold" = "noprd-daily",
+      "platinum" = "noprd-daily"
+    },
+    "prd" = {
+      "bronze" = "prd-weekly",
+      "silver" = "prd-daily-short",
+      "gold" = "prd-daily-short",
+      "platinum" = "prd-daily-short"
+    }
+  }
+
+  default_backup_policy_name   = local.managed_by_cap ? lookup(lookup(local.backup_policy_mapping, local.environment, {}), local.service_level, "DefaultPolicy") : "DefaultPolicy"
+  enable_backup                = var.backup == "true" && local.environment != "sbx" && local.environment != "hml"
 
   actual_virtual_machine = var.os.type == "Windows" ? azurerm_windows_virtual_machine.virtual_machine[0] : azurerm_linux_virtual_machine.virtual_machine[0]
 
-  policy_name = local.managed_by_cap ? lookup({ for mapping in local.rsv_mapping : "${mapping.availability}:${mapping.env}" => mapping.policy }, "${var.availability}:${local.environment}", "DefaultPolicy") : "DefaultPolicy"
 
   windows_winrm_script         = "${path.module}/../../scripts/ConfigureWinRM.ps1"
   win_post_deploy_scripts_path = (var.windows_postinstall_script == "" ? ["${local.windows_winrm_script}"] : ["${local.windows_winrm_script}", "${var.windows_postinstall_script}"])

@@ -8,5 +8,8 @@ resource "azurerm_virtual_machine_extension" "aad_ssh_login" {
   virtual_machine_id         = azurerm_linux_virtual_machine.virtual_machine[0].id
   auto_upgrade_minor_version = true
 
+  lifecycle {
+    ignore_changes = [ tags ]
+  }
   depends_on = [azurerm_managed_disk.virtual_machine_data_disk, azurerm_virtual_machine_data_disk_attachment.virtual_machine_data_disk_attachment, null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }

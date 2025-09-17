@@ -31,7 +31,7 @@ locals {
 
   # Vérifier si tous les utilisateurs sont valides
   is_valid_users = length(local.invalid_users) == 0
- 
+
 
 
   # Trouver les administrateurs qui ne respectent pas les préfixes autorisés

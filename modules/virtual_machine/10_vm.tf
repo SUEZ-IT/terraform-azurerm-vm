@@ -7,6 +7,10 @@ resource "azurerm_network_interface" "nic" {
     subnet_id                     = data.azurerm_subnet.vmsubnet.id
     private_ip_address_allocation = "Dynamic"
   }
+
+  lifecycle {
+    ignore_changes = [ tags ]
+  }
   depends_on = [null_resource.validation_bastion_ad, null_resource.validation_bastion_ba]
 }
 
@@ -78,10 +82,13 @@ resource "azurerm_linux_virtual_machine" "virtual_machine" {
   identity {
     type = "SystemAssigned"
   }
-  plan {
-    name      = var.os.type == "Rocky" && var.os.version == "9" ? local.plan_name : "" 
-    product   = var.os.type == "Rocky" && var.os.version == "9" ? local.plan_product : ""
-    publisher = var.os.type == "Rocky" && var.os.version == "9" ? local.plan_publisher : ""
+  dynamic "plan" {
+    for_each = var.os.type == "Rocky" && var.os.version == "9" ? [1] : []
+    content {
+      name      = local.plan_name
+      product   = local.plan_product
+      publisher = local.plan_publisher
+    }
   }
   os_disk {
     name                 = "${local.vm_name}-osdisk"
